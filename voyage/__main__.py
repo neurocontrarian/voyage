@@ -12,7 +12,7 @@ from zoneinfo import ZoneInfo
 
 from voyage.config import ROOT, load_airlines, load_trip
 from voyage.gflights import GoogleFlights
-from voyage.notify import GitHubIssues
+from voyage.notify import PANNE, notifier
 from voyage.pricing import Itinerary
 from voyage.search import Searcher
 
@@ -124,17 +124,15 @@ def main() -> int:
 
     DATA.mkdir(exist_ok=True)
     state = load_state()
-    gh = GitHubIssues.from_env()
+    gh = notifier()
     best = outcome.itineraries[0] if outcome.itineraries else None
     best_direct = next((i for i in outcome.itineraries if i.stops == 0), None)
     append_history(now, best, best_direct, outcome)
 
     if best is None:
         state["echecs"] = state.get("echecs", 0) + 1
-        if state["echecs"] == trip.alerte["echecs_avant_alerte"] and gh:
-            gh.post("panne", "⚠️ La surveillance des prix ne fonctionne plus",
-                    "Ce ticket signale les pannes du programme.",
-                    f"{state['echecs']} exécutions d'affilée sans résultat. Erreurs :\n\n```\n"
+        if state["echecs"] == trip.alerte["echecs_avant_alerte"]:
+            gh.post(*PANNE, f"{state['echecs']} exécutions d'affilée sans résultat. Erreurs :\n\n```\n"
                     + "\n".join(outcome.errors[:15]) + "\n```")
         STATE.write_text(json.dumps(state, indent=2, ensure_ascii=False))
         return 1
@@ -146,15 +144,15 @@ def main() -> int:
     record = state.get("record") if "score" in state.get("record", {}) else None
     if record is None or best.score <= record["score"] - trip.alerte["baisse_min"]:
         if record:
-            previous = f" (précédent : {money(record['total'])} le {record['date']})"
+            counted = f", compté {money(record['score'])}" if record["score"] != record["total"] else ""
+            previous = f" (précédent : {money(record['total'])}{counted}, le {record['date']})"
         elif state.get("record"):
             previous = " (classement recalculé avec les préférences de qualité des compagnies)"
         else:
             previous = ""
-        if gh:
-            gh.post("alerte-prix", f"✈️ Alertes prix — {trip.nom}",
-                    "Un commentaire est ajouté ici chaque fois qu'un meilleur prix apparaît.",
-                    f"### Nouveau meilleur choix : {money(best.total)}{previous}\n\n{text}")
+        gh.post("alerte-prix", f"✈️ Alertes prix — {trip.nom}",
+                "Un commentaire est ajouté ici chaque fois qu'un meilleur prix apparaît.",
+                f"### Nouveau meilleur choix : {money(best.total)}{previous}\n\n{text}")
         state["record"] = {"total": round(best.total), "score": round(best.score),
                            "cle": best.key, "date": f"{now:%Y-%m-%d %H:%M}"}
     state["derniere_execution"] = now.isoformat(timespec="minutes")

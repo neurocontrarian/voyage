@@ -1,0 +1,45 @@
+name: Alertes
+
+# La recherche tourne sur le serveur de Montréal (scripts/serveur.sh), qui dépose ses alertes
+# dans data/a_publier/. Ce workflow les publie avec le robot GitHub (pour que le courriel
+# parte), et vérifie chaque heure que le serveur fonctionne toujours.
+on:
+  push:
+    paths: ["data/a_publier/**"]
+  schedule:
+    - cron: "47 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: alertes
+  cancel-in-progress: false
+
+jobs:
+  alertes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Publier les alertes déposées par le serveur
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python -m voyage.notify publier
+      - name: Vérifier que le serveur fonctionne
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python -m voyage.notify veille --heures 3
+      - name: Retirer les alertes publiées
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A data/a_publier
+          git diff --cached --quiet && exit 0
+          git commit -q -m "Alertes publiées"
+          git pull -q --rebase && git push -q

@@ -1,9 +1,17 @@
 # voyage — surveillance automatique du prix des vols
 
-Toutes les heures, GitHub Actions interroge Google Flights pour le voyage décrit dans
+Toutes les heures, un serveur à Montréal interroge Google Flights pour le voyage décrit dans
 [`config/voyage.yaml`](config/voyage.yaml). Le programme calcule le **coût réel avec les
-valises**, puis publie une alerte dans un ticket GitHub dès qu'un meilleur prix apparaît.
-GitHub envoie alors un courriel.
+valises**, puis enregistre le résultat dans ce dépôt. Dès qu'un meilleur prix apparaît, une
+alerte est publiée dans un ticket GitHub, et GitHub envoie un courriel.
+
+**Pourquoi un serveur à Montréal et pas GitHub Actions ?** Google affiche les prix selon le
+pays de l'internaute. Depuis les serveurs américains de GitHub, les mêmes vols Air Canada
+coûtaient 3 339 $ au lieu de 2 961 $ (mesuré le 15 oct. 2026). Les prix de TAP et
+d'Air Transat, eux, étaient identiques. GitHub Actions sert donc à deux choses :
+publier les alertes, pour que le courriel parte (GitHub ne notifie pas ses propres messages
+au propriétaire), et faire le veilleur, avec un ticket « panne » si le serveur n'a rien
+publié depuis 3 h.
 
 Voyage surveillé actuellement : Montréal → Portugal (Lisbonne ou Porto), départ à partir du
 25 mars 2027, retour le 3 avril au plus tard, au moins 6 nuits, 3 passagers, 2 valises en soute.
@@ -15,7 +23,7 @@ Voyage surveillé actuellement : Montréal → Portugal (Lisbonne ou Porto), dé
 | Alertes (nouveau meilleur prix) | ticket **« ✈️ Alertes prix »** (étiquette `alerte-prix`) |
 | Dernière recherche, top 5 détaillé | [`data/dernier_resultat.md`](data/dernier_resultat.md) |
 | Historique heure par heure | [`data/historique.csv`](data/historique.csv) |
-| Panne (Google a changé quelque chose) | ticket **« ⚠️ … ne fonctionne plus »** (étiquette `panne`) |
+| Panne (serveur éteint, Google a changé…) | ticket **« ⚠️ … ne fonctionne plus »** (étiquette `panne`) |
 
 Pour recevoir les courriels, il faut que les notifications GitHub par courriel soient
 activées (Settings → Notifications). Chaque alerte mentionne le propriétaire du dépôt.
@@ -66,6 +74,21 @@ valises, règles d'escale. Si une nouvelle compagnie ressort souvent, ajouter se
 `config/compagnies.yaml` ; sinon une règle générique prudente s'applique. Supprimer
 `data/etat.json` pour repartir de zéro dans les alertes.
 
+## Installation sur un serveur
+
+Il faut un serveur allumé en permanence, situé au Canada, avec `git` et `gh` connectés au
+compte GitHub :
+
+```bash
+git clone https://github.com/neurocontrarian/voyage.git ~/voyage-serveur
+~/voyage-serveur/scripts/serveur.sh          # premier essai (crée .venv, journal serveur.log)
+crontab -e                                   # ajouter :
+17 * * * * $HOME/voyage-serveur/scripts/serveur.sh
+```
+
+À chaque exécution, le script récupère la dernière version du programme, lance la
+recherche, puis pousse `data/`.
+
 ## Lancer à la main
 
 ```bash
@@ -74,7 +97,6 @@ python -m voyage --essai     # affiche le résultat, sans alerte ni écriture da
 python -m pytest -q tests
 ```
 
-Sur GitHub : onglet **Actions → Surveillance des prix → Run workflow**.
 
 ## Sources et briques réutilisées
 
