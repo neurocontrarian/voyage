@@ -2,8 +2,9 @@
   "echecs": 0,
   "record": {
     "total": 2829,
+    "score": 3112,
     "cle": "aller-retour | 2027-03-26 TP254 | 2027-04-02 TP253",
-    "date": "2026-10-15 18:57"
+    "date": "2026-10-15 19:02"
   },
-  "derniere_execution": "2026-10-15T18:57-04:00"
+  "derniere_execution": "2026-10-15T19:02-04:00"
 }
