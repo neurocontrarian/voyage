@@ -7,8 +7,9 @@ DIR="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$DIR" || exit 1
 exec 9>"$DIR/.verrou"
 flock -n 9 || exit 0                       # une seule exécution à la fois
-exec >>"$DIR/serveur.log" 2>&1
+# Journal limité aux 2000 dernières lignes (raccourci avant de l'ouvrir en écriture).
 tail -n 2000 serveur.log > serveur.log.tmp 2>/dev/null && mv serveur.log.tmp serveur.log
+exec >>"$DIR/serveur.log" 2>&1
 echo "=== $(date '+%Y-%m-%d %H:%M')"
 
 git pull -q --rebase || exit 1             # récupère aussi les mises à jour du programme
