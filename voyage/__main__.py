@@ -10,8 +10,10 @@ import sys
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
+from fli.models import Airline
+
 from voyage.config import ROOT, load_airlines, load_trip
-from voyage.gflights import GoogleFlights
+from voyage.gflights import GoogleFlights, Slice
 from voyage.notify import PANNE, notifier
 from voyage.pricing import Itinerary
 from voyage.search import Searcher
@@ -21,7 +23,14 @@ STATE = DATA / "etat.json"
 HISTORY = DATA / "historique.csv"
 REPORT = DATA / "dernier_resultat.md"
 TZ = ZoneInfo("America/Toronto")
-CITY = {"LIS": "Lisbonne", "OPO": "Porto", "FAO": "Faro", "YUL": "Montréal"}
+CITY = {
+    "YUL": "Montréal", "LIS": "Lisbonne", "OPO": "Porto", "FAO": "Faro", "PDL": "Ponta Delgada",
+    "YYZ": "Toronto", "BOS": "Boston", "EWR": "Newark", "JFK": "New York", "PHL": "Philadelphie",
+    "IAD": "Washington", "MAD": "Madrid", "CDG": "Paris", "LHR": "Londres", "FRA": "Francfort",
+}
+DAYS = ["lun.", "mar.", "mer.", "jeu.", "ven.", "sam.", "dim."]
+MONTHS = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août",
+          "septembre", "octobre", "novembre", "décembre"]
 
 log = logging.getLogger("voyage")
 
@@ -34,51 +43,105 @@ def city(code: str) -> str:
     return CITY.get(code, code)
 
 
-def describe(i: Itinerary, rank: int) -> str:
-    cities = " → ".join(dict.fromkeys([city(i.out.dest), city(i.ret.origin)]))
-    stops = "direct" if i.stops == 0 else f"{i.stops} escale(s)"
-    links = " · ".join(f"[lien {n}]({u})" for n, u in enumerate(i.links, 1)) if len(i.links) > 1 \
-        else f"[voir sur Google Flights]({i.links[0]})" if i.links else ""
-    out = [
-        f"{rank}. **{money(i.total)}** — {i.kind}, {cities}, "
-        f"{i.out.legs[0].dep:%d/%m} → {i.ret.legs[-1].arr:%d/%m}, {stops}",
-        f"   - Aller : {i.out.describe()}",
-        f"   - Retour : {i.ret.describe()}",
-        *(f"   - {line}" for line in i.lines),
+def day(dt) -> str:
+    return f"{DAYS[dt.weekday()]} {dt.day} {MONTHS[dt.month - 1]}"
+
+
+def hour(dt) -> str:
+    return f"{dt.hour} h {dt.minute:02d}"
+
+
+def duration(minutes: int) -> str:
+    return f"{minutes // 60} h {minutes % 60:02d}"
+
+
+def airline_name(code: str, airlines: dict) -> str:
+    if code in airlines:
+        return airlines[code]["nom"]
+    try:
+        return Airline[code].value
+    except KeyError:
+        return code
+
+
+def airlines_of(s: Slice, airlines: dict) -> str:
+    return " + ".join(dict.fromkeys(airline_name(leg.airline, airlines) for leg in s.legs))
+
+
+def both(out: str, ret: str) -> str:
+    return out if out == ret else f"{out} (aller) · {ret} (retour)"
+
+
+def trip_line(s: Slice) -> str:
+    dep, arr = s.legs[0].dep, s.legs[-1].arr
+    arrival = hour(arr) if arr.date() == dep.date() else f"{day(arr)} {hour(arr)}"
+    stops = "direct" if not s.stops else ", ".join(
+        f"escale à {city(leg.dest)} ({duration(m)})" for leg, m in zip(s.legs, s.layovers))
+    return (f"{day(dep)}, {city(s.origin)} {hour(dep)} → {city(s.dest)} {arrival}"
+            f" · {stops} · {duration(s.total_minutes)}")
+
+
+def links(i: Itinerary) -> str:
+    if len(i.links) == 1:
+        return f"[Voir sur Google Flights]({i.links[0]})"
+    return " · ".join(f"[Voir {what} sur Google Flights]({url})"
+                      for what, url in zip(("l'aller", "le retour"), i.links))
+
+
+def card(i: Itinerary, trip, airlines: dict) -> str:
+    """Fiche courte du meilleur voyage : l'essentiel, le détail est sur le site de la compagnie."""
+    rows = [
+        ("Compagnie", both(airlines_of(i.out, airlines), airlines_of(i.ret, airlines))),
+        ("Tarif à choisir", both(*i.fares)),
+        ("Aller", trip_line(i.out)),
+        ("Retour", trip_line(i.ret)),
+        ("Arrivée au Portugal", city(i.out.dest)),
+        ("Départ du Portugal", city(i.ret.origin)),
     ]
-    if links:
-        out.append(f"   - {links}")
-    return "\n".join(out)
+    if i.kind == "2 allers simples":
+        rows.append(("Réservation", "2 billets séparés (un aller simple, un retour simple)"))
+    elif i.kind.startswith("multi-villes"):
+        rows.append(("Réservation", "« multi-destinations » sur le site de la compagnie (prix estimé)"))
+    table = "\n".join(f"| **{k}** | {v} |" for k, v in rows)
+    return (f"### {money(i.total)} tout compris\n"
+            f"{trip.passagers} personnes, taxes et {trip.bagages_soute} valises en soute incluses\n\n"
+            f"| | |\n|---|---|\n{table}\n\n{links(i)}")
 
 
-def report(trip, outcome, now: datetime) -> str:
-    top = outcome.itineraries[: trip.alerte["top"]]
-    lines = [
-        f"## {trip.nom} — {now:%Y-%m-%d %H:%M} (heure de Montréal)",
-        "",
-        f"{trip.passagers} passagers, {trip.bagages_soute} valises en soute, "
-        f"{outcome.requests} pages Google Flights consultées, {len(outcome.errors)} échec(s).",
-        "",
-        *(describe(i, n) + "\n" for n, i in enumerate(top, 1)),
-        *two_cities_section(outcome, top),
-        "_Total = prix Google Flights taxes incluses + valises selon le tarif le plus avantageux "
-        "de chaque compagnie (`config/compagnies.yaml`). Classement : certaines compagnies sont "
-        "comptées plus cher pour leur qualité (`penalite_qualite`), le prix affiché reste le vrai. Les montants « estimé » viennent des "
-        "règles des compagnies : vérifier le prix final sur leur site avant d'acheter. "
-        "« multi-villes (estimé) » = à réserver en « multi-destinations » sur le site de la "
-        "compagnie ; « 2 allers simples » = deux billets séparés._",
-    ]
-    return "\n".join(lines)
+def summary_row(i: Itinerary, airlines: dict, note: str = "") -> str:
+    stops = "direct" if i.stops == 0 else f"{i.stops} escale" + ("s" if i.stops > 1 else "")
+    cities = " / ".join(dict.fromkeys([city(i.out.dest), city(i.ret.origin)]))
+    company = both(airlines_of(i.out, airlines), airlines_of(i.ret, airlines))
+    return (f"| {money(i.total)}{note} | {company} | {i.out.legs[0].dep.day}/{i.out.legs[0].dep.month}"
+            f" → {i.ret.legs[0].dep.day}/{i.ret.legs[0].dep.month} | {stops} | {cities} |")
 
 
-def two_cities_section(outcome, top) -> list[str]:
-    best = outcome.best_two_cities
-    if best is None or best in top:
-        return []
-    note = "" if best in outcome.itineraries else \
-        " (écartée : l'escale ne fait pas économiser assez par rapport au meilleur direct)"
-    return [f"**Pour info — meilleure option arrivée et départ de villes différentes**{note} :",
-            "", describe(best, 0).replace("0. ", "", 1) + "\n"]
+FOOTER = ("_Prix = Google Flights taxes incluses + valises selon le tarif indiqué. "
+          "Vérifier sur le site de la compagnie avant d'acheter._")
+
+
+def report(trip, outcome, airlines: dict, now: datetime) -> str:
+    """Contenu de data/dernier_resultat.md : la fiche du meilleur voyage, puis les suivants."""
+    if not outcome.itineraries:
+        return f"## {trip.nom} — {now:%Y-%m-%d %H:%M}\n\nAucun résultat."
+    best, others = outcome.itineraries[0], outcome.itineraries[1: trip.alerte["top"]]
+    # † : moins cher que le premier choix, mais classé après à cause d'une préférence qualité.
+    rows = [summary_row(i, airlines, " †" if i.total < best.total else "") for i in others]
+    two = outcome.best_two_cities
+    if two and two is not best and two not in others:
+        rows.append(summary_row(two, airlines, " *"))
+    lines = [f"## {trip.nom} — recherche du {now:%Y-%m-%d à %H:%M}", "", card(best, trip, airlines)]
+    if rows:
+        lines += ["", "#### Autres options", "",
+                  "| Prix | Compagnie | Dates | Escales | Villes |", "|---|---|---|---|---|", *rows]
+        if any(i.total < best.total for i in others):
+            penalized = ", ".join(f"{p['nom']} +{p['penalite_qualite'] * 100:.0f} %"
+                                  for p in airlines.values() if p.get("penalite_qualite"))
+            lines.append(f"\n† moins cher, mais classé après (préférence qualité : {penalized})")
+        if two and two not in outcome.itineraries:
+            lines.append("\n\\* deux villes différentes ; l'escale ne fait pas économiser 15 % "
+                         "par rapport au meilleur vol direct")
+    return "\n".join([*lines, "", FOOTER])
 
 
 def load_state() -> dict:
@@ -115,7 +178,7 @@ def main() -> int:
     gf = GoogleFlights(trip.devise, trip.passagers)
     outcome = Searcher(trip, airlines, gf).run()
     now = datetime.now(TZ)
-    text = report(trip, outcome, now)
+    text = report(trip, outcome, airlines, now)
     print(text)
     for err in outcome.errors[:10]:
         log.warning(err)
@@ -152,7 +215,7 @@ def main() -> int:
             previous = ""
         gh.post("alerte-prix", f"✈️ Alertes prix — {trip.nom}",
                 "Un commentaire est ajouté ici chaque fois qu'un meilleur prix apparaît.",
-                f"### Nouveau meilleur choix : {money(best.total)}{previous}\n\n{text}")
+                f"**Nouveau meilleur prix**{previous}\n\n{card(best, trip, airlines)}\n\n{FOOTER}")
         state["record"] = {"total": round(best.total), "score": round(best.score),
                            "cle": best.key, "date": f"{now:%Y-%m-%d %H:%M}"}
     state["derniere_execution"] = now.isoformat(timespec="minutes")

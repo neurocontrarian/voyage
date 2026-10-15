@@ -21,6 +21,7 @@ class Itinerary:
     nonbasic_price: float | None = None
     total: float = 0.0
     score: float = 0.0  # prix utilisé pour le classement (préférences de qualité incluses)
+    fares: tuple[str, str] = ("", "")  # tarif à choisir à l'aller et au retour
     lines: list[str] = field(default_factory=list)
 
     @property
@@ -94,29 +95,33 @@ def price_itinerary(itin: Itinerary, airlines: dict, passengers: int, bags: int)
     scenarios = []
 
     # Scénario 1 : prix Google + options des tarifs à partir du tarif présumé affiché.
-    extra, lines = 0.0, []
+    extra, lines, fares = 0.0, [], []
     for label, s in (("aller", itin.out), ("retour", itin.ret)):
         policy = _policy(airlines, s.carrier)
         options = slice_options(policy, base_index(policy, itin.base_is_basic), passengers, bags)
         best = min(options, key=lambda o: o.extra)
         extra += best.extra
         lines.append(_option_line(label, policy, best, options))
-    scenarios.append((itin.price + extra, lines))
+        fares.append(best.family)
+    scenarios.append((itin.price + extra, lines, fares))
 
     # Scénario 2 : prix exact du tarif « non-base » obtenu de Google + valises de ce tarif.
     if itin.base_is_basic and itin.nonbasic_price:
         extra, lines = 0.0, [f"prix Google hors économie de base : {_fmt(itin.nonbasic_price)}"]
+        fares = []
         for label, s in (("aller", itin.out), ("retour", itin.ret)):
             policy = _policy(airlines, s.carrier)
             family = policy["tarifs"][base_index(policy, False)]
             cost = bag_cost(family, passengers, bags)
             extra += cost
+            fares.append(family["nom"])
             lines.append(
                 f"{label} {policy['nom']} {family['nom']} : valises {_fmt(cost)} ({family['avantages']})"
             )
-        scenarios.append((itin.nonbasic_price + extra, lines))
+        scenarios.append((itin.nonbasic_price + extra, lines, fares))
 
-    itin.total, lines = min(scenarios, key=lambda sc: sc[0])
+    itin.total, lines, fares = min(scenarios, key=lambda sc: sc[0])
+    itin.fares = tuple(fares)
     itin.lines = [f"prix Google (taxes incluses, {passengers} pers.) : {_fmt(itin.price)}", *lines]
 
     # Préférence de qualité : chaque trajet compte pour moitié du voyage.

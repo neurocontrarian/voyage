@@ -75,6 +75,11 @@ class Slice:
         ]
 
     @property
+    def total_minutes(self) -> int:
+        """Durée du trajet, correspondances comprises."""
+        return self.flight_minutes + sum(self.layovers)
+
+    @property
     def carrier(self) -> str:
         """Compagnie du plus long vol : c'est sa politique tarifaire qui s'applique."""
         return max(self.legs, key=lambda leg: leg.minutes).airline
