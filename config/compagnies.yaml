@@ -1,0 +1,108 @@
+# Politiques tarifaires des compagnies (vols transatlantiques Canada <-> Europe, classe économique).
+#
+# Google Flights donne le prix TOTAL taxes incluses du tarif le moins cher, sans dire de quel
+# tarif il s'agit ni ce qu'il inclut. Ce fichier permet de calculer le vrai coût avec bagages.
+#
+# Pour chaque compagnie, les tarifs sont listés du moins cher au plus cher :
+#   bagages_inclus  : valises en soute incluses PAR PASSAGER
+#   frais_bagage    : [1re valise, 2e valise] en $ CAD par valise et par trajet (taxes estimées incluses)
+#   supplement      : écart de prix ESTIMÉ avec le tarif précédent, $ CAD par passager et par trajet
+#   google_basic    : true si Google Flights classe ce tarif « économie de base » (son filtre
+#                     « exclure l'économie de base » le retire) ; false sinon ; null si inconnu
+#   avantages       : affichés dans les alertes
+#
+# Les montants marqués « estimé » sont à recalibrer quand on observe un vrai prix.
+
+AC:
+  nom: Air Canada
+  source: aircanada.com, avis « Baggage fee changes » (tarifs achetés dès le 14 mai 2026)
+  tarifs:
+    - nom: Économie Basic
+      google_basic: true
+      bagages_inclus: 0
+      frais_bagage: [104, 138]          # 90 $ / 120 $ + taxes
+      avantages: "aucune modification, siège attribué à l'enregistrement"
+    - nom: Économie Standard
+      google_basic: false
+      bagages_inclus: 1
+      frais_bagage: [138, 138]
+      supplement: 80                    # estimé
+      avantages: "1 valise incluse, modification avec frais, choix du siège payant"
+    - nom: Économie Flex
+      google_basic: false
+      bagages_inclus: 1
+      frais_bagage: [138, 138]
+      supplement: 150                   # estimé
+      avantages: "1 valise incluse, modification sans frais, choix du siège standard inclus"
+
+TS:
+  nom: Air Transat
+  source: airtransat.com « Nos options tarifaires » ; frais de valise Eco Budget estimés
+  tarifs:
+    - nom: Eco Budget
+      google_basic: null
+      bagages_inclus: 0
+      frais_bagage: [80, 100]           # estimé (100 $ à moins de 24 h du départ)
+      avantages: "bagage cabine inclus vers l'Europe, ni modification ni annulation"
+    - nom: Eco Standard
+      google_basic: false
+      bagages_inclus: 1
+      frais_bagage: [100, 100]
+      supplement: 70                    # estimé
+      avantages: "1 valise incluse, siège standard inclus, modification avec frais"
+    - nom: Eco Flex
+      google_basic: false
+      bagages_inclus: 2
+      frais_bagage: [100, 100]
+      supplement: 150                   # estimé
+      avantages: "2 valises incluses, tout siège éco, modification et annulation sans frais"
+
+PD:
+  nom: Porter (vols opérés par Air Transat)
+  source: partage de codes avec Air Transat ; mêmes règles que TS par défaut
+  meme_que: TS
+
+TP:
+  nom: TAP Air Portugal
+  source: flytap.com « Produits TAP » ; frais de valise Discount estimés (114-120 $ observés)
+  tarifs:
+    - nom: Discount
+      google_basic: false               # Google ne le retire pas avec « exclure l'économie de base »
+      bagages_inclus: 0
+      frais_bagage: [115, 115]          # estimé
+      avantages: "bagage cabine 10 kg, siège et modification payants"
+    - nom: Basic
+      google_basic: false
+      bagages_inclus: 1
+      frais_bagage: [115, 115]
+      supplement: 60                    # estimé
+      avantages: "1 valise incluse (vols intercontinentaux), siège payant"
+    - nom: Classic
+      google_basic: false
+      bagages_inclus: 1
+      frais_bagage: [115, 115]
+      supplement: 50                    # estimé
+      avantages: "1 valise incluse, choix du siège inclus, modification avec frais"
+    - nom: Plus
+      google_basic: false
+      bagages_inclus: 1
+      frais_bagage: [115, 115]
+      supplement: 200                   # estimé
+      avantages: "1 valise, siège inclus, modification et remboursement inclus"
+
+# Compagnie absente de la liste : hypothèse prudente (aucune valise incluse dans le prix affiché).
+"*":
+  nom: Autre compagnie
+  source: hypothèse générique, à préciser si cette compagnie ressort souvent
+  tarifs:
+    - nom: tarif le moins cher
+      google_basic: null
+      bagages_inclus: 0
+      frais_bagage: [110, 140]
+      avantages: "conditions à vérifier"
+    - nom: tarif avec valise
+      google_basic: false
+      bagages_inclus: 1
+      frais_bagage: [140, 140]
+      supplement: 100
+      avantages: "1 valise incluse (hypothèse)"

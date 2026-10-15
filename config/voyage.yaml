@@ -1,0 +1,37 @@
+# Voyage surveillé. Pour un autre voyage, il suffit de modifier ce fichier.
+
+nom: Portugal printemps 2027
+
+origine: YUL                    # Montréal-Trudeau
+destinations: [LIS, OPO]        # Lisbonne, Porto (grandes villes du Portugal continental)
+villes_differentes: true        # arriver dans une ville et repartir d'une autre
+
+depart_au_plus_tot: 2027-03-25
+retour_au_plus_tard: 2027-04-03 # date d'arrivée à Montréal au plus tard
+nuits_min: 6                    # nuits sur place (les vols vers l'Europe partent le soir
+                                # et arrivent le lendemain matin)
+
+passagers: 3                    # 2 adultes + 1 ado de 14 ans (tarif adulte dès 12 ans)
+bagages_soute: 2                # nombre total de valises en soute pour le groupe
+devise: CAD
+
+escales:
+  max: 1
+  correspondance_min_minutes: 60
+  correspondance_max_minutes: 180
+  # Temps de vol (hors attente en correspondance) toléré au-delà d'un vol direct.
+  temps_de_vol_en_plus_max_minutes: 120
+  # Durée d'un vol direct de référence, pour mesurer le détour.
+  duree_vol_direct_minutes: {aller: 400, retour: 450}
+  # Une escale n'est retenue que si le prix total est au moins 15 % sous le meilleur direct.
+  economie_min_vs_direct: 0.15
+
+recherche:
+  allers_detailles: 4           # nb d'allers dont on va chercher les retours (par date et ville)
+  allers_simples_combines: 3    # nb de meilleurs allers simples combinés entre eux
+  verifier_tarif_de_base: 10    # nb de meilleurs résultats re-vérifiés (tarif « base » ou non)
+
+alerte:
+  baisse_min: 25                # $ : écart minimal pour signaler un nouveau meilleur prix
+  echecs_avant_alerte: 3        # exécutions ratées d'affilée avant de signaler une panne
+  top: 5                        # nb d'options listées dans chaque alerte

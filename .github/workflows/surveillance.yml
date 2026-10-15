@@ -1,0 +1,39 @@
+name: Surveillance des prix
+
+on:
+  schedule:
+    - cron: "17 * * * *"   # toutes les heures (GitHub peut retarder de quelques minutes)
+  workflow_dispatch:
+
+permissions:
+  contents: write   # enregistrer l'historique dans data/
+  issues: write     # publier les alertes
+
+concurrency:
+  group: surveillance
+  cancel-in-progress: false
+
+jobs:
+  verifier:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Recherche des prix
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python -m voyage
+      - name: Enregistrer l'historique
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data
+          git diff --cached --quiet && exit 0
+          git commit -q -m "Prix du $(TZ=America/Toronto date '+%Y-%m-%d %H:%M')"
+          git pull -q --rebase && git push -q

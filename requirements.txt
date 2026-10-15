@@ -1,0 +1,4 @@
+# fli : accès Google Flights. Version de la branche principale (sept. 2026), la seule qui
+# passe par la page publique depuis que Google a verrouillé son API interne en août 2026.
+flights @ git+https://github.com/punitarani/fli@881aee5ff4321e81ea2157cb44be94ce6a21dc1b
+pyyaml>=6

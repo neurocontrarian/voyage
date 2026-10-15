@@ -1,0 +1,87 @@
+# voyage — surveillance automatique du prix des vols
+
+Toutes les heures, GitHub Actions interroge Google Flights pour le voyage décrit dans
+[`config/voyage.yaml`](config/voyage.yaml). Le programme calcule le **coût réel avec les
+valises**, puis publie une alerte dans un ticket GitHub dès qu'un meilleur prix apparaît.
+GitHub envoie alors un courriel.
+
+Voyage surveillé actuellement : Montréal → Portugal (Lisbonne ou Porto), départ à partir du
+25 mars 2027, retour le 3 avril au plus tard, au moins 6 nuits, 3 passagers, 2 valises en soute.
+
+## Où voir les résultats
+
+| Quoi | Où |
+|---|---|
+| Alertes (nouveau meilleur prix) | ticket **« ✈️ Alertes prix »** (étiquette `alerte-prix`) |
+| Dernière recherche, top 5 détaillé | [`data/dernier_resultat.md`](data/dernier_resultat.md) |
+| Historique heure par heure | [`data/historique.csv`](data/historique.csv) |
+| Panne (Google a changé quelque chose) | ticket **« ⚠️ … ne fonctionne plus »** (étiquette `panne`) |
+
+Pour recevoir les courriels, il faut que les notifications GitHub par courriel soient
+activées (Settings → Notifications). Chaque alerte mentionne le propriétaire du dépôt.
+
+## Comment le prix est calculé
+
+1. **Prix Google Flights** : total taxes incluses pour tous les passagers, en $ CA.
+   Il correspond au tarif le moins cher de la compagnie, souvent sans valise en soute.
+2. **Vérification du tarif de base** : pour les meilleurs résultats, le programme redemande
+   les mêmes vols en excluant l'« économie de base ». Si le prix ne bouge pas, le tarif
+   affiché n'est pas un tarif de base. C'est le cas par exemple pour Air Canada Standard,
+   qui inclut une valise. Si le prix monte, on obtient le prix exact du tarif suivant.
+3. **Politique de chaque compagnie** ([`config/compagnies.yaml`](config/compagnies.yaml)) :
+   pour chaque trajet, le programme compare deux options. Soit on garde le tarif affiché et
+   on paie les valises, soit on passe au tarif qui les inclut. Il retient la moins chère et
+   indique ce que le tarif suivant apporterait (choix du siège, modifications…).
+4. **Escales** :
+   - au plus une escale par trajet ;
+   - correspondance de 60 min à 3 h ;
+   - pas plus de 2 h de vol en plus qu'un direct ;
+   - et seulement si le total est **au moins 15 % moins cher** que le meilleur direct.
+
+Les types de résultats :
+
+- **aller-retour** : prix exact de Google pour l'aller et le retour indiqués.
+- **2 allers simples** : deux billets séparés (prix exact de chacun). Permet de mélanger les
+  compagnies ou les villes.
+- **multi-villes (estimé)** : arrivée dans une ville et départ d'une autre, avec la même
+  compagnie. Depuis août 2026, Google ne laisse plus interroger ce mode sans navigateur.
+  On l'estime donc selon la règle tarifaire des compagnies (moitié de l'aller-retour vers
+  chaque ville). À réserver en « multi-destinations » sur le site de la compagnie.
+- La meilleure option **villes différentes** est toujours affichée « pour info », même si son
+  escale ne passe pas la règle des 15 %.
+
+⚠️ Les montants marqués « estimé » (frais de valise de certains tarifs, écarts entre tarifs)
+viennent des règles publiées ou observées. Il faut **vérifier le prix final sur le site de la
+compagnie** avant d'acheter, puis corriger `config/compagnies.yaml` si un montant a changé.
+
+## Réutiliser pour un autre voyage
+
+Modifier [`config/voyage.yaml`](config/voyage.yaml) : aéroports, dates, nuits, passagers,
+valises, règles d'escale. Si une nouvelle compagnie ressort souvent, ajouter ses tarifs dans
+`config/compagnies.yaml` ; sinon une règle générique prudente s'applique. Supprimer
+`data/etat.json` pour repartir de zéro dans les alertes.
+
+## Lancer à la main
+
+```bash
+pip install -r requirements.txt
+python -m voyage --essai     # affiche le résultat, sans alerte ni écriture dans data/
+python -m pytest -q tests
+```
+
+Sur GitHub : onglet **Actions → Surveillance des prix → Run workflow**.
+
+## Sources et briques réutilisées
+
+- [fli](https://github.com/punitarani/fli) : lecture de Google Flights (page publique),
+  aller-retour détaillé, liens de réservation. Le paramètre « exclure l'économie de base »
+  (champ 25) est ajouté ici.
+- Idée de l'historique dans le dépôt et des alertes par ticket :
+  [AndrewFoudree/flight-tracker](https://github.com/AndrewFoudree/flight-tracker).
+  Ce projet passe par des API payantes ou à quota (SerpApi, Travelpayouts) ; ici, rien n'est payant.
+- Politiques tarifaires : Air Canada (avis sur les frais de bagages, 14 mai 2026), Air Transat
+  (options tarifaires), TAP (produits TAP). Voir `config/compagnies.yaml`.
+
+Limites : Google Flights n'a pas d'API officielle, donc le format peut changer sans
+préavis. Dans ce cas, le ticket « panne » s'ouvre après 3 échecs d'affilée, et il suffit
+souvent de mettre à jour la version de fli dans `requirements.txt`.
