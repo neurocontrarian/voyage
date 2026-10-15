@@ -97,14 +97,14 @@ class Searcher:
         itins = self._dedupe(itins)
         for itin in itins:
             self._price(itin)
-        itins.sort(key=lambda i: i.total)
+        itins.sort(key=lambda i: i.score)
 
         to_check = keep_worthwhile(itins, trip)[: trip.recherche["verifier_tarif_de_base"]]
         two_cities = self._best_two_cities(itins)
         if two_cities and two_cities not in to_check:
             to_check.append(two_cities)
         self._check_basic(to_check)
-        itins.sort(key=lambda i: i.total)
+        itins.sort(key=lambda i: i.score)
         return Outcome(keep_worthwhile(itins, trip), self.requests, self.errors,
                        self._best_two_cities(itins))
 

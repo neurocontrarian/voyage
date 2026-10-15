@@ -10,6 +10,9 @@
 #   google_basic    : true si Google Flights classe ce tarif « économie de base » (son filtre
 #                     « exclure l'économie de base » le retire) ; false sinon ; null si inconnu
 #   avantages       : affichés dans les alertes
+#   penalite_qualite: (facultatif) préférence de classement. 0.10 = la compagnie est classée
+#                     comme si elle coûtait 10 % de plus ; elle reste proposée, et passe en tête
+#                     si elle est vraiment moins chère. Le prix affiché reste le vrai prix.
 #
 # Les montants marqués « estimé » sont à recalibrer quand on observe un vrai prix.
 
@@ -65,6 +68,11 @@ PD:
 TP:
   nom: TAP Air Portugal
   source: flytap.com « Produits TAP » ; frais de valise Discount estimés (114-120 $ observés)
+  # Qualité vérifiée en oct. 2026 : Skytrax 3 étoiles, 73e mondial en 2026 (66e en 2025), contre
+  # Air Canada 17e, Porter 34e, Air Transat 59e ; ponctualité parmi les plus faibles d'Europe
+  # (OAG ~67 % à l'heure) ; plaintes récurrentes sur le service au sol et le contrôle strict du
+  # poids des bagages cabine. Repas et service à bord plutôt appréciés.
+  penalite_qualite: 0.10
   tarifs:
     - nom: Discount
       google_basic: false               # Google ne le retire pas avec « exclure l'économie de base »

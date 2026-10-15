@@ -57,6 +57,15 @@ def test_air_canada_exact_nonbasic_price_is_used():
     assert itin.total == 4100  # moins cher que Basic + 4 valises (4 x 104 $)
 
 
+def test_tap_quality_preference_affects_ranking_not_price():
+    tap = Itinerary("aller-retour", OUT, RET, 2469)
+    mixed = Itinerary("aller-retour", OUT_AC, RET, 2469, base_is_basic=False)
+    for itin in (tap, mixed):
+        price_itinerary(itin, AIRLINES, 3, 2)
+    assert tap.score == tap.total * 1.10
+    assert mixed.score == mixed.total * 1.05  # TAP seulement au retour
+
+
 def test_porter_uses_transat_rules():
     assert AIRLINES["PD"]["tarifs"] == AIRLINES["TS"]["tarifs"]
 

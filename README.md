@@ -32,7 +32,12 @@ activées (Settings → Notifications). Chaque alerte mentionne le propriétaire
    pour chaque trajet, le programme compare deux options. Soit on garde le tarif affiché et
    on paie les valises, soit on passe au tarif qui les inclut. Il retient la moins chère et
    indique ce que le tarif suivant apporterait (choix du siège, modifications…).
-4. **Escales** :
+4. **Préférence de qualité** : une compagnie peut être classée comme si elle coûtait plus
+   cher (`penalite_qualite` dans `config/compagnies.yaml`). C'est le cas de **TAP (+10 %)** :
+   3 étoiles Skytrax, 73e mondial en 2026, ponctualité parmi les plus faibles d'Europe.
+   TAP reste proposée et passe en tête si elle est vraiment moins chère. Le prix affiché reste
+   le vrai prix, et les alertes suivent ce classement.
+5. **Escales** :
    - au plus une escale par trajet ;
    - correspondance de 60 min à 3 h ;
    - pas plus de 2 h de vol en plus qu'un direct ;

@@ -20,6 +20,7 @@ class Itinerary:
     base_is_basic: bool | None = None
     nonbasic_price: float | None = None
     total: float = 0.0
+    score: float = 0.0  # prix utilisé pour le classement (préférences de qualité incluses)
     lines: list[str] = field(default_factory=list)
 
     @property
@@ -117,6 +118,17 @@ def price_itinerary(itin: Itinerary, airlines: dict, passengers: int, bags: int)
 
     itin.total, lines = min(scenarios, key=lambda sc: sc[0])
     itin.lines = [f"prix Google (taxes incluses, {passengers} pers.) : {_fmt(itin.price)}", *lines]
+
+    # Préférence de qualité : chaque trajet compte pour moitié du voyage.
+    policies = [_policy(airlines, s.carrier) for s in (itin.out, itin.ret)]
+    weight = sum(p.get("penalite_qualite", 0) for p in policies) / 2
+    itin.score = itin.total * (1 + weight)
+    if weight:
+        penalized = {p["nom"]: p["penalite_qualite"] for p in policies if p.get("penalite_qualite")}
+        who = ", ".join(f"{name} +{p * 100:.0f} %" for name, p in penalized.items())
+        itin.lines.append(
+            f"classement : compté {_fmt(itin.score)} (préférence qualité : {who} sur ses trajets)"
+        )
 
 
 def _option_line(label: str, policy: dict, best: Option, options: list[Option]) -> str:

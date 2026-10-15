@@ -62,7 +62,8 @@ def report(trip, outcome, now: datetime) -> str:
         *(describe(i, n) + "\n" for n, i in enumerate(top, 1)),
         *two_cities_section(outcome, top),
         "_Total = prix Google Flights taxes incluses + valises selon le tarif le plus avantageux "
-        "de chaque compagnie (`config/compagnies.yaml`). Les montants « estimé » viennent des "
+        "de chaque compagnie (`config/compagnies.yaml`). Classement : certaines compagnies sont "
+        "comptées plus cher pour leur qualité (`penalite_qualite`), le prix affiché reste le vrai. Les montants « estimé » viennent des "
         "règles des compagnies : vérifier le prix final sur leur site avant d'acheter. "
         "« multi-villes (estimé) » = à réserver en « multi-destinations » sur le site de la "
         "compagnie ; « 2 allers simples » = deux billets séparés._",
@@ -140,15 +141,22 @@ def main() -> int:
 
     state["echecs"] = 0
     REPORT.write_text(text + "\n")
-    record = state.get("record")
-    if record is None or best.total <= record["total"] - trip.alerte["baisse_min"]:
-        previous = f" (précédent record : {money(record['total'])} le {record['date']})" if record else ""
+    # Le record porte sur le classement (prix + préférences de qualité). Un ancien état sans
+    # « score » date d'avant les préférences : on repart d'un nouveau classement.
+    record = state.get("record") if "score" in state.get("record", {}) else None
+    if record is None or best.score <= record["score"] - trip.alerte["baisse_min"]:
+        if record:
+            previous = f" (précédent : {money(record['total'])} le {record['date']})"
+        elif state.get("record"):
+            previous = " (classement recalculé avec les préférences de qualité des compagnies)"
+        else:
+            previous = ""
         if gh:
             gh.post("alerte-prix", f"✈️ Alertes prix — {trip.nom}",
                     "Un commentaire est ajouté ici chaque fois qu'un meilleur prix apparaît.",
-                    f"### Nouveau meilleur prix : {money(best.total)}{previous}\n\n{text}")
-        state["record"] = {"total": round(best.total), "cle": best.key,
-                           "date": f"{now:%Y-%m-%d %H:%M}"}
+                    f"### Nouveau meilleur choix : {money(best.total)}{previous}\n\n{text}")
+        state["record"] = {"total": round(best.total), "score": round(best.score),
+                           "cle": best.key, "date": f"{now:%Y-%m-%d %H:%M}"}
     state["derniere_execution"] = now.isoformat(timespec="minutes")
     STATE.write_text(json.dumps(state, indent=2, ensure_ascii=False))
     return 0
