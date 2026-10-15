@@ -1,4 +1,4 @@
-## Portugal printemps 2027 — 2026-10-15 19:06 (heure de Montréal)
+## Portugal printemps 2027 — 2026-10-15 19:17 (heure de Montréal)
 
 3 passagers, 2 valises en soute, 45 pages Google Flights consultées, 0 échec(s).
 
