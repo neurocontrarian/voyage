@@ -21,12 +21,20 @@ Voyage surveillé actuellement : Montréal → Portugal (Lisbonne ou Porto), dé
 | Quoi | Où |
 |---|---|
 | Alertes (nouveau meilleur prix) | ticket **« ✈️ Alertes prix »** (étiquette `alerte-prix`) |
+| Rappel quotidien à 17 h (meilleure offre de tous les temps + du jour) | même ticket, un commentaire par jour, même sans nouveau record |
+| Tendances (meilleure heure / meilleur jour pour acheter) | [`data/tendances.md`](data/tendances.md), résumé dans le rappel de 17 h |
 | Dernière recherche, top 5 détaillé | [`data/dernier_resultat.md`](data/dernier_resultat.md) |
 | Historique heure par heure | [`data/historique.csv`](data/historique.csv) |
 | Panne (serveur éteint, Google a changé…) | ticket **« ⚠️ … ne fonctionne plus »** (étiquette `panne`) |
 
 Pour recevoir les courriels, il faut que les notifications GitHub par courriel soient
 activées (Settings → Notifications). Chaque alerte mentionne le propriétaire du dépôt.
+
+Le rappel de 17 h ne lance aucune recherche : il lit `data/etat.json` (record et meilleure
+offre du jour). Cron du serveur : `0 17 * * * ~/voyage-serveur/scripts/serveur.sh rappel`.
+Les tendances (`python -m voyage.tendances`) comparent chaque prix à la moyenne de sa journée
+(effet heure) et le prix le plus bas de chaque jour à la moyenne de sa semaine (effet jour) ; elles
+n'apparaissent qu'après 5 journées et 2 semaines de relevés.
 
 ## Comment le prix est calculé
 

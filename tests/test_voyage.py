@@ -100,3 +100,31 @@ def test_minimum_nights():
     assert dates_ok(Itinerary("aller-retour", OUT, RET, 0), TRIP)
     early = Slice((leg("TP253", "LIS", "YUL", "2027-04-01T18:25", "2027-04-01T21:10", 465),))
     assert not dates_ok(Itinerary("aller-retour", OUT, early, 0), TRIP)
+
+
+def test_trends_hour_and_weekday_effects():
+    from voyage import tendances
+    rows = []
+    for d in range(1, 22):  # 3 semaines pleines, prix qui dérive de +1 $ par jour
+        for hour in range(8, 20):
+            base = 1000 + d + (-20 if hour == 3 + 8 else 0) + (-30 if d % 7 == 3 else 0)
+            rows.append((datetime(2026, 11, d, hour, 17), float(base)))
+    hours, n_days = tendances.by_hour(rows)
+    assert n_days == 21 and min(hours, key=hours.get) == 11
+    weekdays, n_weeks = tendances.by_weekday(rows)
+    assert n_weeks == 3 and min(weekdays, key=weekdays.get) == datetime(2026, 11, 3).weekday()
+    assert "vers 11 h" in tendances.advice(rows)
+    assert "pas encore calculables" in tendances.advice(rows[:5])
+
+
+def test_daily_reminder_message():
+    from voyage import rappel
+    now = datetime(2026, 11, 3, 17, 0)
+    record = {"total": 2900, "cle": "a", "date": "2026-11-01 10:17", "fiche": "FICHE-RECORD"}
+    today = {"date": "2026-11-03", "heure": "09:17", "total": 3000, "cle": "b", "fiche": "FICHE-JOUR"}
+    both = rappel.message({"record": record, "jour": today}, now, "TENDANCES")
+    assert "FICHE-RECORD" in both and "FICHE-JOUR" in both and "TENDANCES" in both
+    same = rappel.message({"record": record, "jour": {**today, "cle": "a", "total": 2900}}, now, "T")
+    assert same.count("FICHE-RECORD") == 1 and "FICHE-JOUR" not in same
+    stale = rappel.message({"record": record, "jour": {**today, "date": "2026-11-02"}}, now, "T")
+    assert "Aucune recherche réussie aujourd'hui" in stale

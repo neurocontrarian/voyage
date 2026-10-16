@@ -217,7 +217,16 @@ def main() -> int:
                 "Un commentaire est ajouté ici chaque fois qu'un meilleur prix apparaît.",
                 f"**Nouveau meilleur prix**{previous}\n\n{card(best, trip, airlines)}\n\n{FOOTER}")
         state["record"] = {"total": round(best.total), "score": round(best.score),
-                           "cle": best.key, "date": f"{now:%Y-%m-%d %H:%M}"}
+                           "cle": best.key, "date": f"{now:%Y-%m-%d %H:%M}",
+                           "fiche": card(best, trip, airlines)}
+    elif "fiche" not in record and best.key == record["cle"]:
+        record["fiche"] = card(best, trip, airlines)  # fiche manquante (record d'avant le rappel)
+    # Meilleure offre de la journée, pour le rappel de 17 h.
+    today = state.get("jour")
+    if not today or today["date"] != f"{now:%Y-%m-%d}" or best.score < today["score"]:
+        state["jour"] = {"date": f"{now:%Y-%m-%d}", "heure": f"{now:%H:%M}",
+                         "total": round(best.total), "score": round(best.score),
+                         "cle": best.key, "fiche": card(best, trip, airlines)}
     state["derniere_execution"] = now.isoformat(timespec="minutes")
     STATE.write_text(json.dumps(state, indent=2, ensure_ascii=False))
     return 0
