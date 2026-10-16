@@ -28,7 +28,7 @@ def message(state: dict, now: datetime, advice: str) -> str:
     record, today = state["record"], state.get("jour")
     if today and not today["date"].startswith(f"{now:%Y-%m-%d}"):
         today = None  # dernière recherche réussie : un autre jour
-    if today and today["cle"] == record["cle"]:
+    if today and (today.get("cle"), today.get("total")) == (record["cle"], record["total"]):
         body = section("Meilleure offre — de tous les temps ET d'aujourd'hui "
                        f"(trouvée le {record['date']})", record)
     else:

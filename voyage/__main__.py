@@ -210,7 +210,7 @@ def main() -> int:
         record["fiche"] = fiche  # fiche manquante (record d'avant le rappel)
     # Meilleure offre de la journée, pour le rappel de 17 h.
     today = state.get("jour")
-    if not today or today["date"] != f"{now:%Y-%m-%d}" or best.score < today["score"]:
+    if not today or not today["date"].startswith(f"{now:%Y-%m-%d}") or best.score < today["score"]:
         state["jour"] = entry(best, now, fiche)
     state["derniere_execution"] = now.isoformat(timespec="minutes")
     STATE.write_text(json.dumps(state, indent=2, ensure_ascii=False))

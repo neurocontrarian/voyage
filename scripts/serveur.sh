@@ -9,8 +9,8 @@ cd "$DIR" || exit 1
 exec 9>"$DIR/.verrou"
 case "${1:-recherche}" in
     rappel)                                # le rappel attend la fin d'une recherche en cours
-        LOCK="-w 900"; MODULE=voyage.rappel; MSG="Rappel du $(date '+%Y-%m-%d')";;
-    *)  LOCK="-n"; MODULE=voyage; MSG="Prix du $(date '+%Y-%m-%d %H:%M')";;
+        LOCK="-w 900"; MODULE=voyage.rappel; MSG="Rappel du %Y-%m-%d";;
+    *)  LOCK="-n"; MODULE=voyage; MSG="Prix du %Y-%m-%d %H:%M";;
 esac
 flock $LOCK 9 || exit 0                    # une seule exécution à la fois
 # Journal limité aux 2000 dernières lignes (raccourci avant de l'ouvrir en écriture).
@@ -30,5 +30,5 @@ fi
 
 git add data
 git diff --cached --quiet && exit 0
-git commit -q -m "$MSG"
+git commit -q -m "$(date "+$MSG")"   # horodatage pris après l'attente du verrou
 git pull -q --rebase && git push -q

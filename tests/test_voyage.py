@@ -126,5 +126,7 @@ def test_daily_reminder_message():
     assert "FICHE-RECORD" in both and "FICHE-JOUR" in both and "TENDANCES" in both
     same = rappel.message({"record": record, "jour": {**today, "cle": "a", "total": 2900}}, now, "T")
     assert same.count("FICHE-RECORD") == 1 and "FICHE-JOUR" not in same
+    cheaper_record = rappel.message({"record": {**record, "total": 2800}, "jour": {**today, "cle": "a"}}, now, "T")
+    assert "FICHE-JOUR" in cheaper_record  # même vol, mais prix du jour différent du record
     stale = rappel.message({"record": record, "jour": {**today, "date": "2026-11-02 09:17"}}, now, "T")
     assert "Aucune recherche réussie aujourd'hui" in stale
