@@ -39,6 +39,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          [ -d data/a_publier ] || exit 0  # rien n'a été déposé (git ne garde pas les dossiers vides)
           git add -A data/a_publier
           git diff --cached --quiet && exit 0
           git commit -q -m "Alertes publiées"
