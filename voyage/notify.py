@@ -32,6 +32,17 @@ PANNE = ("panne", "⚠️ La surveillance des prix ne fonctionne plus",
          "Ce ticket signale les pannes du programme. Le fermer une fois le problème réglé.")
 
 
+ALERTE = ("alerte-prix", "✈️ Alertes prix — {nom}",
+          "Un commentaire est ajouté ici chaque fois qu'un meilleur prix apparaît, "
+          "et un rappel chaque jour à 17 h.")
+
+
+def post_alerte(trip, message: str) -> None:
+    """Publie (ou dépose) un commentaire sur le ticket des alertes de prix."""
+    label, title, intro = ALERTE
+    notifier().post(label, title.format(nom=trip.nom), intro, message)
+
+
 class GitHubIssues:
     def __init__(self, repo: str, token: str, owner: str):
         self.repo, self.token, self.owner = repo, token, owner

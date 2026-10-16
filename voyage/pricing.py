@@ -5,6 +5,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
+from voyage.config import money
 from voyage.gflights import Slice
 
 
@@ -86,10 +87,6 @@ def _policy(airlines: dict, code: str) -> dict:
     return airlines.get(code) or airlines["*"]
 
 
-def _fmt(amount: float) -> str:
-    return f"{amount:,.0f} $".replace(",", " ")
-
-
 def price_itinerary(itin: Itinerary, airlines: dict, passengers: int, bags: int) -> None:
     """Remplit ``itin.total`` et ``itin.lines`` (détail du calcul, en français)."""
     scenarios = []
@@ -107,7 +104,7 @@ def price_itinerary(itin: Itinerary, airlines: dict, passengers: int, bags: int)
 
     # Scénario 2 : prix exact du tarif « non-base » obtenu de Google + valises de ce tarif.
     if itin.base_is_basic and itin.nonbasic_price:
-        extra, lines = 0.0, [f"prix Google hors économie de base : {_fmt(itin.nonbasic_price)}"]
+        extra, lines = 0.0, [f"prix Google hors économie de base : {money(itin.nonbasic_price)}"]
         fares = []
         for label, s in (("aller", itin.out), ("retour", itin.ret)):
             policy = _policy(airlines, s.carrier)
@@ -116,13 +113,13 @@ def price_itinerary(itin: Itinerary, airlines: dict, passengers: int, bags: int)
             extra += cost
             fares.append(family["nom"])
             lines.append(
-                f"{label} {policy['nom']} {family['nom']} : valises {_fmt(cost)} ({family['avantages']})"
+                f"{label} {policy['nom']} {family['nom']} : valises {money(cost)} ({family['avantages']})"
             )
         scenarios.append((itin.nonbasic_price + extra, lines, fares))
 
     itin.total, lines, fares = min(scenarios, key=lambda sc: sc[0])
     itin.fares = tuple(fares)
-    itin.lines = [f"prix Google (taxes incluses, {passengers} pers.) : {_fmt(itin.price)}", *lines]
+    itin.lines = [f"prix Google (taxes incluses, {passengers} pers.) : {money(itin.price)}", *lines]
 
     # Préférence de qualité : chaque trajet compte pour moitié du voyage.
     policies = [_policy(airlines, s.carrier) for s in (itin.out, itin.ret)]
@@ -132,18 +129,18 @@ def price_itinerary(itin: Itinerary, airlines: dict, passengers: int, bags: int)
         penalized = {p["nom"]: p["penalite_qualite"] for p in policies if p.get("penalite_qualite")}
         who = ", ".join(f"{name} +{p * 100:.0f} %" for name, p in penalized.items())
         itin.lines.append(
-            f"classement : compté {_fmt(itin.score)} (préférence qualité : {who} sur ses trajets)"
+            f"classement : compté {money(itin.score)} (préférence qualité : {who} sur ses trajets)"
         )
 
 
 def _option_line(label: str, policy: dict, best: Option, options: list[Option]) -> str:
     parts = [f"{label} {policy['nom']} — tarif {best.family}"]
     if best.upgrade:
-        parts.append(f"surclassement {_fmt(best.upgrade)} (estimé)")
-    parts.append(f"valises {_fmt(best.bags)}" if best.bags else "valises incluses")
+        parts.append(f"surclassement {money(best.upgrade)} (estimé)")
+    parts.append(f"valises {money(best.bags)}" if best.bags else "valises incluses")
     line = ", ".join(parts) + f" ({best.advantages})"
     better = [o for o in options if o.extra > best.extra]
     if better:
         nxt = better[0]
-        line += f" ; {nxt.family} pour +{_fmt(nxt.extra - best.extra)} : {nxt.advantages}"
+        line += f" ; {nxt.family} pour +{money(nxt.extra - best.extra)} : {nxt.advantages}"
     return line

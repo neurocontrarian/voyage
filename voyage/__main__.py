@@ -8,21 +8,16 @@ import json
 import logging
 import sys
 from datetime import datetime
-from zoneinfo import ZoneInfo
 
 from fli.models import Airline
 
-from voyage.config import ROOT, load_airlines, load_trip
+from voyage.config import DATA, HISTORY, STATE, TZ, load_airlines, load_state, load_trip, money
 from voyage.gflights import GoogleFlights, Slice
-from voyage.notify import PANNE, notifier
+from voyage.notify import PANNE, notifier, post_alerte
 from voyage.pricing import Itinerary
 from voyage.search import Searcher
 
-DATA = ROOT / "data"
-STATE = DATA / "etat.json"
-HISTORY = DATA / "historique.csv"
 REPORT = DATA / "dernier_resultat.md"
-TZ = ZoneInfo("America/Toronto")
 CITY = {
     "YUL": "Montréal", "LIS": "Lisbonne", "OPO": "Porto", "FAO": "Faro", "PDL": "Ponta Delgada",
     "YYZ": "Toronto", "BOS": "Boston", "EWR": "Newark", "JFK": "New York", "PHL": "Philadelphie",
@@ -33,10 +28,6 @@ MONTHS = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "ao�
           "septembre", "octobre", "novembre", "décembre"]
 
 log = logging.getLogger("voyage")
-
-
-def money(amount: float) -> str:
-    return f"{amount:,.0f} $".replace(",", " ")
 
 
 def city(code: str) -> str:
@@ -144,11 +135,10 @@ def report(trip, outcome, airlines: dict, now: datetime) -> str:
     return "\n".join([*lines, "", FOOTER])
 
 
-def load_state() -> dict:
-    try:
-        return json.loads(STATE.read_text())
-    except (FileNotFoundError, json.JSONDecodeError):
-        return {}
+def entry(best: Itinerary, now: datetime, fiche: str) -> dict:
+    """Ce qu'on retient d'une offre dans etat.json (record ou meilleure offre du jour)."""
+    return {"date": f"{now:%Y-%m-%d %H:%M}", "total": round(best.total), "score": round(best.score),
+            "cle": best.key, "fiche": fiche}
 
 
 def append_history(now, best, best_direct, outcome) -> None:
@@ -204,6 +194,7 @@ def main() -> int:
     REPORT.write_text(text + "\n")
     # Le record porte sur le classement (prix + préférences de qualité). Un ancien état sans
     # « score » date d'avant les préférences : on repart d'un nouveau classement.
+    fiche = card(best, trip, airlines)
     record = state.get("record") if "score" in state.get("record", {}) else None
     if record is None or best.score <= record["score"] - trip.alerte["baisse_min"]:
         if record:
@@ -213,20 +204,14 @@ def main() -> int:
             previous = " (classement recalculé avec les préférences de qualité des compagnies)"
         else:
             previous = ""
-        gh.post("alerte-prix", f"✈️ Alertes prix — {trip.nom}",
-                "Un commentaire est ajouté ici chaque fois qu'un meilleur prix apparaît.",
-                f"**Nouveau meilleur prix**{previous}\n\n{card(best, trip, airlines)}\n\n{FOOTER}")
-        state["record"] = {"total": round(best.total), "score": round(best.score),
-                           "cle": best.key, "date": f"{now:%Y-%m-%d %H:%M}",
-                           "fiche": card(best, trip, airlines)}
+        post_alerte(trip, f"**Nouveau meilleur prix**{previous}\n\n{fiche}\n\n{FOOTER}")
+        state["record"] = entry(best, now, fiche)
     elif "fiche" not in record and best.key == record["cle"]:
-        record["fiche"] = card(best, trip, airlines)  # fiche manquante (record d'avant le rappel)
+        record["fiche"] = fiche  # fiche manquante (record d'avant le rappel)
     # Meilleure offre de la journée, pour le rappel de 17 h.
     today = state.get("jour")
     if not today or today["date"] != f"{now:%Y-%m-%d}" or best.score < today["score"]:
-        state["jour"] = {"date": f"{now:%Y-%m-%d}", "heure": f"{now:%H:%M}",
-                         "total": round(best.total), "score": round(best.score),
-                         "cle": best.key, "fiche": card(best, trip, airlines)}
+        state["jour"] = entry(best, now, fiche)
     state["derniere_execution"] = now.isoformat(timespec="minutes")
     STATE.write_text(json.dumps(state, indent=2, ensure_ascii=False))
     return 0

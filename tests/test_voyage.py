@@ -113,18 +113,18 @@ def test_trends_hour_and_weekday_effects():
     assert n_days == 21 and min(hours, key=hours.get) == 11
     weekdays, n_weeks = tendances.by_weekday(rows)
     assert n_weeks == 3 and min(weekdays, key=weekdays.get) == datetime(2026, 11, 3).weekday()
-    assert "vers 11 h" in tendances.advice(rows)
-    assert "pas encore calculables" in tendances.advice(rows[:5])
+    assert "vers 11 h" in tendances.analyse(rows)[0]
+    assert "pas encore calculables" in tendances.analyse(rows[:5])[0]
 
 
 def test_daily_reminder_message():
     from voyage import rappel
     now = datetime(2026, 11, 3, 17, 0)
     record = {"total": 2900, "cle": "a", "date": "2026-11-01 10:17", "fiche": "FICHE-RECORD"}
-    today = {"date": "2026-11-03", "heure": "09:17", "total": 3000, "cle": "b", "fiche": "FICHE-JOUR"}
+    today = {"date": "2026-11-03 09:17", "total": 3000, "cle": "b", "fiche": "FICHE-JOUR"}
     both = rappel.message({"record": record, "jour": today}, now, "TENDANCES")
     assert "FICHE-RECORD" in both and "FICHE-JOUR" in both and "TENDANCES" in both
     same = rappel.message({"record": record, "jour": {**today, "cle": "a", "total": 2900}}, now, "T")
     assert same.count("FICHE-RECORD") == 1 and "FICHE-JOUR" not in same
-    stale = rappel.message({"record": record, "jour": {**today, "date": "2026-11-02"}}, now, "T")
+    stale = rappel.message({"record": record, "jour": {**today, "date": "2026-11-02 09:17"}}, now, "T")
     assert "Aucune recherche réussie aujourd'hui" in stale

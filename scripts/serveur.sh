@@ -7,12 +7,12 @@ set -uo pipefail
 DIR="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$DIR" || exit 1
 exec 9>"$DIR/.verrou"
-MODE="${1:-recherche}"
-if [ "$MODE" = rappel ]; then
-    flock -w 900 9 || exit 0               # le rappel attend la fin d'une recherche en cours
-else
-    flock -n 9 || exit 0                   # une seule exécution à la fois
-fi
+case "${1:-recherche}" in
+    rappel)                                # le rappel attend la fin d'une recherche en cours
+        LOCK="-w 900"; MODULE=voyage.rappel; MSG="Rappel du $(date '+%Y-%m-%d')";;
+    *)  LOCK="-n"; MODULE=voyage; MSG="Prix du $(date '+%Y-%m-%d %H:%M')";;
+esac
+flock $LOCK 9 || exit 0                    # une seule exécution à la fois
 # Journal limité aux 2000 dernières lignes (raccourci avant de l'ouvrir en écriture).
 tail -n 2000 serveur.log > serveur.log.tmp 2>/dev/null && mv serveur.log.tmp serveur.log
 exec >>"$DIR/serveur.log" 2>&1
@@ -26,13 +26,7 @@ if ! cmp -s requirements.txt .venv/requirements.txt; then
     .venv/bin/pip install -q -r requirements.txt && cp requirements.txt .venv/requirements.txt
 fi
 
-if [ "$MODE" = rappel ]; then
-    .venv/bin/python -m voyage.rappel
-    MSG="Rappel du $(date '+%Y-%m-%d')"
-else
-    .venv/bin/python -m voyage
-    MSG="Prix du $(date '+%Y-%m-%d %H:%M')"
-fi
+.venv/bin/python -m "$MODULE"
 
 git add data
 git diff --cached --quiet && exit 0

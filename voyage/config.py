@@ -2,13 +2,30 @@
 
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass
 from datetime import date, timedelta
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 import yaml
 
 ROOT = Path(__file__).resolve().parent.parent
+DATA = ROOT / "data"
+STATE = DATA / "etat.json"
+HISTORY = DATA / "historique.csv"
+TZ = ZoneInfo("America/Toronto")
+
+
+def money(amount: float) -> str:
+    return f"{amount:,.0f} $".replace(",", " ")
+
+
+def load_state() -> dict:
+    try:
+        return json.loads(STATE.read_text())
+    except (FileNotFoundError, json.JSONDecodeError):
+        return {}
 
 
 @dataclass(frozen=True)
