@@ -13,8 +13,9 @@ publier les alertes, pour que le courriel parte (GitHub ne notifie pas ses propr
 au propriétaire), et faire le veilleur, avec un ticket « panne » si le serveur n'a rien
 publié depuis 3 h.
 
-Voyage surveillé actuellement : Montréal → Portugal (Lisbonne ou Porto), départ à partir du
-25 mars 2027, retour le 3 avril au plus tard, au moins 6 nuits, 3 passagers, 2 valises en soute.
+Voyage surveillé actuellement : Montréal → Portugal (Lisbonne ou Porto), départ le jeudi
+25 mars 2027, arrivée à Montréal le 2 avril au plus tard, 7 nuits sur place (6 nuits seulement si
+le total est au moins 15 % moins cher), 3 passagers, 2 valises en soute.
 
 ## Où voir les résultats
 
@@ -41,9 +42,10 @@ n'apparaissent qu'après 5 journées et 2 semaines de relevés.
 1. **Prix Google Flights** : total taxes incluses pour tous les passagers, en $ CA.
    Il correspond au tarif le moins cher de la compagnie, souvent sans valise en soute.
 2. **Vérification du tarif de base** : pour les meilleurs résultats, le programme redemande
-   les mêmes vols en excluant l'« économie de base ». Si le prix ne bouge pas, le tarif
-   affiché n'est pas un tarif de base. C'est le cas par exemple pour Air Canada Standard,
-   qui inclut une valise. Si le prix monte, on obtient le prix exact du tarif suivant.
+   les mêmes vols en excluant l'« économie de base ». Si le prix monte, on obtient le prix
+   exact du tarif suivant. Si le prix ne bouge pas, on ne conclut rien : sur le transatlantique,
+   Google ignore ce filtre (il le respecte sur un vol intérieur comme Montréal–Toronto). On
+   suppose alors le tarif le moins cher de la compagnie, donc les valises à payer en plus.
 3. **Politique de chaque compagnie** ([`config/compagnies.yaml`](config/compagnies.yaml)) :
    pour chaque trajet, le programme compare deux options. Soit on garde le tarif affiché et
    on paie les valises, soit on passe au tarif qui les inclut. Il retient la moins chère et
@@ -77,7 +79,7 @@ compagnie** avant d'acheter, puis corriger `config/compagnies.yaml` si un montan
 
 ## Réutiliser pour un autre voyage
 
-Modifier [`config/voyage.yaml`](config/voyage.yaml) : aéroports, dates, nuits, passagers,
+Modifier [`config/voyage.yaml`](config/voyage.yaml) : aéroports, date de départ, nuits, passagers,
 valises, règles d'escale. Si une nouvelle compagnie ressort souvent, ajouter ses tarifs dans
 `config/compagnies.yaml` ; sinon une règle générique prudente s'applique. Supprimer
 `data/etat.json` pour repartir de zéro dans les alertes.

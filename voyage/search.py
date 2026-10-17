@@ -222,6 +222,8 @@ class Searcher:
                 nonbasic = pa + pb if pa and pb else None
             else:
                 continue
-            i.base_is_basic = nonbasic is None or nonbasic > i.price + 0.5
+            # Sur le transatlantique, Google ignore ce filtre : un prix inchangé ne prouve rien
+            # (inconnu = on suppose le tarif le moins cher, valises à payer).
+            i.base_is_basic = True if nonbasic is None or nonbasic > i.price + 0.5 else None
             i.nonbasic_price = nonbasic
             self._price(i)

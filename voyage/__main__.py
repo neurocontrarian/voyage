@@ -84,6 +84,8 @@ def card(i: Itinerary, trip, airlines: dict) -> str:
     rows = [
         ("Compagnie", both(airlines_of(i.out, airlines), airlines_of(i.ret, airlines))),
         ("Tarif à choisir", both(*i.fares)),
+        ("Détail du prix", f"vols {money(i.total - i.extras)} (taxes incluses)"
+                           + (f" + valises et tarif {money(i.extras)}" if i.extras else " + aucune valise à payer")),
         ("Aller", trip_line(i.out)),
         ("Retour", trip_line(i.ret)),
         ("Arrivée au Portugal", city(i.out.dest)),

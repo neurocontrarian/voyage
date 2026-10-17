@@ -34,9 +34,10 @@ class Trip:
     origine: str
     destinations: list[str]
     villes_differentes: bool
-    depart_au_plus_tot: date
+    depart: date
     retour_au_plus_tard: date
-    nuits_min: int
+    nuits: int
+    nuit_en_moins_economie_min: float
     passagers: int
     bagages_soute: int
     devise: str
@@ -45,17 +46,10 @@ class Trip:
     alerte: dict
 
     def date_pairs(self) -> list[tuple[date, date]]:
-        """Couples (date de départ, date du vol retour). Les vols vers l'Europe arrivent le
-        lendemain du départ, d'où le +1 pour compter les nuits sur place."""
-        pairs = []
-        dep = self.depart_au_plus_tot
-        while dep + timedelta(days=self.nuits_min + 1) <= self.retour_au_plus_tard:
-            ret = dep + timedelta(days=self.nuits_min + 1)
-            while ret <= self.retour_au_plus_tard:
-                pairs.append((dep, ret))
-                ret += timedelta(days=1)
-            dep += timedelta(days=1)
-        return pairs
+        """Couples (date de départ, date du vol retour) : le nombre de nuits prévu, et une nuit
+        de moins. Les vols vers l'Europe arrivent le lendemain du départ, d'où le +1."""
+        returns = (self.depart + timedelta(days=self.nuits + 1 - fewer) for fewer in (0, 1))
+        return [(self.depart, r) for r in returns if r <= self.retour_au_plus_tard]
 
 
 def load_trip(path: Path | None = None) -> Trip:

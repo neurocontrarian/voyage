@@ -15,17 +15,15 @@ def leg(code, origin, dest, dep, arr, minutes):
                datetime.fromisoformat(arr), minutes)
 
 
-OUT = Slice((leg("TP254", "YUL", "LIS", "2027-03-26T22:45", "2027-03-27T09:40", 415),))
+OUT = Slice((leg("TP254", "YUL", "LIS", "2027-03-25T22:45", "2027-03-26T09:40", 415),))
 RET = Slice((leg("TP253", "LIS", "YUL", "2027-04-02T18:25", "2027-04-02T21:10", 465),))
-OUT_AC = Slice((leg("AC812", "YUL", "LIS", "2027-03-26T22:40", "2027-03-27T09:20", 400),))
+OUT_AC = Slice((leg("AC812", "YUL", "LIS", "2027-03-25T22:40", "2027-03-26T09:20", 400),))
 RET_AC = Slice((leg("AC813", "LIS", "YUL", "2027-04-02T11:25", "2027-04-02T13:50", 445),))
 
 
-def test_date_pairs_respect_nights_and_window():
-    pairs = TRIP.date_pairs()
-    assert pairs[0] == (date(2027, 3, 25), date(2027, 4, 1))
-    assert pairs[-1] == (date(2027, 3, 27), date(2027, 4, 3))
-    assert all((r - d).days - 1 >= TRIP.nuits_min for d, r in pairs)
+def test_date_pairs_fixed_departure_and_one_night_less():
+    assert TRIP.date_pairs() == [(date(2027, 3, 25), date(2027, 4, 2)),
+                                 (date(2027, 3, 25), date(2027, 4, 1))]
 
 
 def test_bag_cost_first_bags_then_second_bags():
@@ -51,6 +49,13 @@ def test_air_canada_standard_when_google_confirms_not_basic():
     assert itin.total == 4548  # Standard : 1 valise par passager, rien à ajouter
 
 
+def test_air_canada_unknown_fare_is_assumed_basic_with_bags_to_pay():
+    # Sur le transatlantique, Google ignore le filtre : un prix inchangé ne prouve rien.
+    itin = Itinerary("aller-retour", OUT_AC, RET_AC, 2961)
+    price_itinerary(itin, AIRLINES, 3, 2)
+    assert itin.total == 2961 + 2 * 2 * 104 and itin.extras == 416 and itin.fares == ("Économie Basic",) * 2
+
+
 def test_air_canada_exact_nonbasic_price_is_used():
     itin = Itinerary("aller-retour", OUT_AC, RET_AC, 4000, base_is_basic=True, nonbasic_price=4100)
     price_itinerary(itin, AIRLINES, 3, 2)
@@ -72,34 +77,47 @@ def test_porter_uses_transat_rules():
 
 def test_connection_rules():
     via_lis = Slice((
-        leg("TP254", "YUL", "LIS", "2027-03-26T22:45", "2027-03-27T09:40", 415),
-        leg("TP1926", "LIS", "OPO", "2027-03-27T12:30", "2027-03-27T13:30", 60),
+        leg("TP254", "YUL", "LIS", "2027-03-25T22:45", "2027-03-26T09:40", 415),
+        leg("TP1926", "LIS", "OPO", "2027-03-26T12:30", "2027-03-26T13:30", 60),
     ))
     assert slice_ok(via_lis, TRIP, "aller")
     long_wait = replace(via_lis, legs=(via_lis.legs[0], replace(
-        via_lis.legs[1], dep=datetime(2027, 3, 27, 18, 0), arr=datetime(2027, 3, 27, 19, 0))))
+        via_lis.legs[1], dep=datetime(2027, 3, 26, 18, 0), arr=datetime(2027, 3, 26, 19, 0))))
     assert not slice_ok(long_wait, TRIP, "aller")
     detour = Slice((
-        leg("AF345", "YUL", "CDG", "2027-03-26T20:05", "2027-03-27T08:35", 450),
-        leg("AF1528", "CDG", "OPO", "2027-03-27T09:35", "2027-03-27T10:35", 120),
+        leg("AF345", "YUL", "CDG", "2027-03-25T20:05", "2027-03-26T08:35", 450),
+        leg("AF1528", "CDG", "OPO", "2027-03-26T09:35", "2027-03-26T10:35", 120),
     ))
     assert not slice_ok(detour, TRIP, "aller")
 
 
 def test_connection_kept_only_if_15_percent_cheaper():
     direct = Itinerary("aller-retour", OUT, RET, 0, total=3000)
-    via = Slice((OUT.legs[0], leg("TP1926", "LIS", "OPO", "2027-03-27T12:30",
-                                  "2027-03-27T13:30", 60)))
+    via = Slice((OUT.legs[0], leg("TP1926", "LIS", "OPO", "2027-03-26T12:30",
+                                  "2027-03-26T13:30", 60)))
     cheap = Itinerary("aller-retour", via, RET, 0, total=2500)
     pricey = Itinerary("aller-retour", via, RET, 0, total=2700)
     kept = keep_worthwhile([direct, cheap, pricey], TRIP)
     assert cheap in kept and pricey not in kept and direct in kept
 
 
-def test_minimum_nights():
-    assert dates_ok(Itinerary("aller-retour", OUT, RET, 0), TRIP)
-    early = Slice((leg("TP253", "LIS", "YUL", "2027-04-01T18:25", "2027-04-01T21:10", 465),))
-    assert not dates_ok(Itinerary("aller-retour", OUT, early, 0), TRIP)
+def test_nights_and_departure_date():
+    assert dates_ok(Itinerary("aller-retour", OUT, RET, 0), TRIP)  # 7 nuits
+    one_less = Slice((leg("TP253", "LIS", "YUL", "2027-04-01T18:25", "2027-04-01T21:10", 465),))
+    two_less = Slice((leg("TP253", "LIS", "YUL", "2027-03-31T18:25", "2027-03-31T21:10", 465),))
+    assert dates_ok(Itinerary("aller-retour", OUT, one_less, 0), TRIP)  # 6 nuits
+    assert not dates_ok(Itinerary("aller-retour", OUT, two_less, 0), TRIP)
+    next_day = Slice((leg("TP254", "YUL", "LIS", "2027-03-26T22:45", "2027-03-27T09:40", 415),))
+    assert not dates_ok(Itinerary("aller-retour", next_day, RET, 0), TRIP)  # départ le 26 : refusé
+
+
+def test_one_night_less_kept_only_if_15_percent_cheaper():
+    one_less = Slice((leg("TP253", "LIS", "YUL", "2027-04-01T18:25", "2027-04-01T21:10", 465),))
+    full = Itinerary("aller-retour", OUT, RET, 0, total=3000)
+    short_cheap = Itinerary("aller-retour", OUT, one_less, 0, total=2550)
+    short_close = Itinerary("aller-retour", OUT, one_less, 0, total=2600)
+    kept = keep_worthwhile([full, short_cheap, short_close], TRIP)
+    assert full in kept and short_cheap in kept and short_close not in kept
 
 
 def test_trends_hour_and_weekday_effects():

@@ -6,10 +6,12 @@ origine: YUL                    # Montréal-Trudeau
 destinations: [LIS, OPO]        # Lisbonne, Porto (grandes villes du Portugal continental)
 villes_differentes: true        # arriver dans une ville et repartir d'une autre
 
-depart_au_plus_tot: 2027-03-25
-retour_au_plus_tard: 2027-04-03 # date d'arrivée à Montréal au plus tard
-nuits_min: 6                    # nuits sur place (les vols vers l'Europe partent le soir
+depart: 2027-03-25              # date de départ de Montréal, fixe (jeudi)
+retour_au_plus_tard: 2027-04-02 # date d'arrivée à Montréal au plus tard
+nuits: 7                        # nuits sur place (les vols vers l'Europe partent le soir
                                 # et arrivent le lendemain matin)
+# Une nuit de moins (retour la veille) n'est retenue que si le prix total baisse d'au moins 15 %.
+nuit_en_moins_economie_min: 0.15
 
 passagers: 3                    # 2 adultes + 1 ado de 14 ans (tarif adulte dès 12 ans)
 bagages_soute: 2                # nombre total de valises en soute pour le groupe
