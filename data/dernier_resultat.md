@@ -1,31 +1,27 @@
-## Portugal printemps 2027 — recherche du 2026-10-16 à 21:17
+## Portugal printemps 2027 — recherche du 2026-10-16 à 22:17
 
-### 2 961 $ tout compris
+### 4 392 $ tout compris
 3 personnes, taxes et 2 valises en soute incluses
 
 | | |
 |---|---|
-| **Compagnie** | Air Canada |
-| **Tarif à choisir** | Économie Standard |
-| **Aller** | sam. 27 mars, Montréal 21 h 45 → Lisbonne dim. 28 mars 9 h 20 · direct · 6 h 35 |
-| **Retour** | sam. 3 avril, Lisbonne 11 h 25 → Montréal 13 h 50 · direct · 7 h 25 |
+| **Compagnie** | Air Canada + TAP Air Portugal (aller) · TAP Air Portugal (retour) |
+| **Tarif à choisir** | Basic |
+| **Détail du prix** | vols 4 032 $ (taxes incluses) + valises et tarif 360 $ |
+| **Aller** | jeu. 25 mars, Montréal 20 h 00 → Lisbonne ven. 26 mars 9 h 55 · escale à Boston (1 h 55) · 9 h 55 |
+| **Retour** | ven. 2 avril, Lisbonne 18 h 25 → Montréal 21 h 10 · direct · 7 h 45 |
 | **Arrivée au Portugal** | Lisbonne |
 | **Départ du Portugal** | Lisbonne |
 
-[Voir sur Google Flights](https://www.google.com/travel/flights/booking?tfs=CBwQAho_EgoyMDI3LTAzLTI3Ih8KA1lVTBIKMjAyNy0wMy0yNxoDTElTKgJBQzIDODEyagcIARIDWVVMcgcIARIDTElTGj8SCjIwMjctMDQtMDMiHwoDTElTEgoyMDI3LTA0LTAzGgNZVUwqAkFDMgM4MTNqBwgBEgNMSVNyBwgBEgNZVUxAAUABQAFIAXABggELCP___________wGYAQE&hl=fr&gl=CA&curr=CAD)
+[Voir sur Google Flights](https://www.google.com/travel/flights/booking?tfs=CBwQAhphEgoyMDI3LTAzLTI1IiAKA1lVTBIKMjAyNy0wMy0yNRoDQk9TKgJBQzIEODYxMiIfCgNCT1MSCjIwMjctMDMtMjUaA0xJUyoCVFAyAzIxNmoHCAESA1lVTHIHCAESA0xJUxo_EgoyMDI3LTA0LTAyIh8KA0xJUxIKMjAyNy0wNC0wMhoDWVVMKgJUUDIDMjUzagcIARIDTElTcgcIARIDWVVMQAFAAUABSAFwAYIBCwj___________8BmAEB&hl=fr&gl=CA&curr=CAD)
 
 #### Autres options
 
 | Prix | Compagnie | Dates | Escales | Villes |
 |---|---|---|---|---|
-| 2 958 $ † | TAP Air Portugal | 26/3 → 2/4 | direct | Lisbonne |
-| 4 062 $ | TAP Air Portugal | 26/3 → 2/4 | direct | Lisbonne |
-| 4 548 $ | Air Canada | 26/3 → 2/4 | direct | Lisbonne |
-| 4 728 $ | Air Canada | 26/3 → 3/4 | direct | Lisbonne |
-| 2 991 $ * | TAP Air Portugal | 26/3 → 2/4 | 1 escale | Porto / Lisbonne |
-
-† moins cher, mais classé après (préférence qualité : TAP Air Portugal +10 %)
-
-\* deux villes différentes ; l'escale ne fait pas économiser 15 % par rapport au meilleur vol direct
+| 4 484 $ | Air Canada + TAP Air Portugal (aller) · TAP Air Portugal (retour) | 25/3 → 2/4 | 1 escale | Lisbonne |
+| 6 658 $ | Air Canada + TAP Air Portugal (aller) · Air Canada (retour) | 25/3 → 2/4 | 1 escale | Lisbonne |
+| 6 793 $ | Air Canada + TAP Air Portugal (aller) · United Airlines (retour) | 25/3 → 2/4 | 2 escales | Lisbonne |
+| 7 142 $ | Air Canada + TAP Air Portugal (aller) · TAP Air Portugal + Air Canada (retour) | 25/3 → 2/4 | 2 escales | Lisbonne / Porto |
 
 _Prix = Google Flights taxes incluses + valises selon le tarif indiqué. Vérifier sur le site de la compagnie avant d'acheter._
