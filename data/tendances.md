@@ -1,34 +1,34 @@
 ## Tendances de prix
 
-Tendances pas encore calculables (4 journée(s) et 0 semaine(s) de données ; il en faut 5 et 2).
+Moment le moins cher pour acheter — heure : vers 17 h (-1,3 % par rapport à la moyenne).
 
-_71 relevés. Écart = prix par rapport à la moyenne de la journée (heures) ou de la semaine (jours) ; négatif = moins cher. Indicatif : plus il y a de données, plus c'est fiable._
+_95 relevés. Écart = prix par rapport à la moyenne de la journée (heures) ou de la semaine (jours) ; négatif = moins cher. Indicatif : plus il y a de données, plus c'est fiable._
 
-### Par heure (4 journées retenues)
+### Par heure (5 journées retenues)
 
 | Heure | Écart |
 |---|---|
-| 0 h | -1,3 % |
-| 1 h | -1,3 % |
-| 2 h | -1,3 % |
-| 3 h | -1,3 % |
-| 4 h | -1,3 % |
-| 5 h | -1,3 % |
-| 6 h | -1,3 % |
-| 7 h | -1,3 % |
-| 8 h | -1,3 % |
-| 9 h | -1,3 % |
-| 10 h | -1,3 % |
-| 11 h | -1,3 % |
-| 12 h | -1,3 % |
-| 13 h | -1,3 % |
-| 14 h | -1,3 % |
-| 15 h | -1,3 % |
-| 16 h | -1,3 % |
-| 17 h | -1,9 % |
-| 18 h | -1,9 % |
-| 19 h | -1,0 % |
-| 20 h | -1,3 % |
-| 21 h | -1,3 % |
-| 22 h | +14,2 % |
-| 23 h | +14,2 % |
+| 0 h | -1,0 % |
+| 1 h | -1,0 % |
+| 2 h | -1,0 % |
+| 3 h | -1,0 % |
+| 4 h | -1,0 % |
+| 5 h | -1,0 % |
+| 6 h | -1,0 % |
+| 7 h | -1,0 % |
+| 8 h | -1,0 % |
+| 9 h | -1,0 % |
+| 10 h | -1,0 % |
+| 11 h | -1,0 % |
+| 12 h | -1,0 % |
+| 13 h | -1,0 % |
+| 14 h | -1,0 % |
+| 15 h | -1,0 % |
+| 16 h | -1,0 % |
+| 17 h | -1,3 % |
+| 18 h | -1,3 % |
+| 19 h | -0,8 % |
+| 20 h | -1,0 % |
+| 21 h | -1,0 % |
+| 22 h | +10,6 % |
+| 23 h | +10,6 % |
