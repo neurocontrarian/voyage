@@ -1,13 +1,13 @@
-## Portugal printemps 2027 — recherche du 2026-10-23 à 05:17
+## Portugal printemps 2027 — recherche du 2026-10-23 à 06:17
 
-### 4 368 $ tout compris
+### 4 367 $ tout compris
 3 personnes, taxes et 2 valises en soute incluses
 
 | | |
 |---|---|
 | **Compagnie** | Royal Air Maroc (aller) · TAP Air Portugal (retour) |
 | **Tarif à choisir** | tarif le moins cher (aller) · Basic (retour) |
-| **Détail du prix** | vols 3 968 $ (taxes incluses) + valises et tarif 400 $ |
+| **Détail du prix** | vols 3 967 $ (taxes incluses) + valises et tarif 400 $ |
 | **Aller** | jeu. 25 mars, Montréal 21 h 40 → Lisbonne ven. 26 mars 11 h 30 · escale à CMN (1 h 45) · 9 h 50 |
 | **Retour** | ven. 2 avril, Lisbonne 18 h 25 → Montréal 21 h 10 · direct · 7 h 45 |
 | **Arrivée au Portugal** | Lisbonne |
@@ -21,9 +21,9 @@
 | Prix | Compagnie | Dates | Escales | Villes |
 |---|---|---|---|---|
 | 4 259 $ † | Air Canada + TAP Air Portugal (aller) · TAP Air Portugal (retour) | 25/3 → 2/4 | 1 escale | Lisbonne |
-| 4 466 $ | Air Canada + TAP Air Portugal (aller) · TAP Air Portugal (retour) | 25/3 → 2/4 | 1 escale | Lisbonne |
+| 4 465 $ | Air Canada + TAP Air Portugal (aller) · TAP Air Portugal (retour) | 25/3 → 2/4 | 1 escale | Lisbonne |
 | 6 559 $ | Royal Air Maroc (aller) · Air Canada (retour) | 25/3 → 2/4 | 1 escale | Lisbonne |
-| 6 671 $ | Royal Air Maroc (aller) · United Airlines (retour) | 25/3 → 2/4 | 2 escales | Lisbonne |
+| 6 668 $ | Royal Air Maroc (aller) · United Airlines (retour) | 25/3 → 2/4 | 2 escales | Lisbonne |
 | 7 040 $ * | Royal Air Maroc (aller) · TAP Air Portugal + Air Canada (retour) | 25/3 → 2/4 | 2 escales | Lisbonne / Porto |
 
 † moins cher, mais classé après (préférence qualité : TAP Air Portugal +10 %)
