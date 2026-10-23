@@ -7,18 +7,14 @@ from voyage.gflights import Slice
 from voyage.pricing import Itinerary
 
 
-def slice_ok(s: Slice, trip: Trip, direction: str) -> bool:
-    """direction : "aller" ou "retour". Escales permises par au moins un scénario."""
-    rules = trip.escales
-    if s.stops > trip.escales_max:
-        return False
-    if any(
-        not rules["correspondance_min_minutes"] <= m <= rules["correspondance_max_minutes"]
-        for m in s.layovers
-    ):
-        return False
-    limit = rules["duree_vol_direct_minutes"][direction] + rules["temps_de_vol_en_plus_max_minutes"]
-    return s.flight_minutes <= limit
+def slice_ok(s: Slice, trip: Trip) -> bool:
+    """Trajet acceptable : escales permises par au moins un scénario, durée totale (attente en
+    escale comprise) sous le maximum, et aucun vol d'une compagnie exclue."""
+    return (
+        s.stops <= trip.escales_max
+        and s.total_minutes <= trip.duree_trajet_max_minutes
+        and not any(leg.airline in trip.compagnies_exclues for leg in s.legs)
+    )
 
 
 def fits(itin: Itinerary, sc: Scenario) -> bool:

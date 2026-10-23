@@ -76,7 +76,8 @@ class Trip:
     passagers: int
     bagages_soute: int
     devise: str
-    escales: dict
+    duree_trajet_max_minutes: int
+    compagnies_exclues: list[str]
     recherche: dict
     alerte: dict
 

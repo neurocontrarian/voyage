@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
 import json
 import logging
 import sys
@@ -175,6 +176,13 @@ def entry(best: Itinerary, now: datetime, fiche: str, airlines: dict) -> dict:
             "cle": best.key, "fiche": fiche, "resume": summary_line(best, airlines)}
 
 
+def rules_id(trip, sc) -> str:
+    """Empreinte des règles d'un scénario : si elles changent, son record ne compte plus."""
+    rules = (sc, trip.origine, trip.destinations, trip.villes_differentes, trip.passagers,
+             trip.bagages_soute, trip.duree_trajet_max_minutes, sorted(trip.compagnies_exclues))
+    return hashlib.sha1(repr(rules).encode()).hexdigest()[:10]
+
+
 def alert_message(news: list, trip, airlines: dict) -> str:
     """news : (scénario, meilleur voyage, ancien record ou None) des scénarios améliorés."""
     parts, shown = [], {}
@@ -244,7 +252,7 @@ def main() -> int:
     state["echecs"] = 0
     REPORT.write_text(text + "\n")
     # Record et meilleure offre du jour de chaque scénario. Le record porte sur le classement
-    # (prix + préférences de qualité). Un scénario renommé repart de zéro.
+    # (prix + préférences de qualité). Un scénario dont les règles changent repart de zéro.
     for legacy in ("record", "jour"):  # état d'avant les scénarios
         state.pop(legacy, None)
     old, news = state.get("scenarios", {}), []
@@ -252,8 +260,8 @@ def main() -> int:
     for r in outcome.scenarios:
         sc, number = r.scenario, str(r.scenario.numero)
         mine = old.get(number) or {}
-        if mine.get("nom") != sc.nom:
-            mine = {"nom": sc.nom}
+        if mine.get("regles") != rules_id(trip, sc):
+            mine = {"nom": sc.nom, "regles": rules_id(trip, sc)}
         state["scenarios"][number] = mine
         if not r.itineraries:
             continue

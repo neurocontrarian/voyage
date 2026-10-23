@@ -98,7 +98,7 @@ class Searcher:
         # 2. Retours des meilleurs allers.
         tasks, k = {}, trip.recherche["allers_detailles"]
         for (d, r), city in product(pairs, cities):
-            outs = self._best(boards[("rt", d, r, city)], "aller", k)
+            outs = self._best(boards[("rt", d, r, city)], k)
             for out in outs:
                 tasks[("rt-ret", d, r, city, out.slice.key)] = (
                     [self._segment(o, city, d, out.slice), self._segment(city, o, r)], False, False)
@@ -137,16 +137,16 @@ class Searcher:
 
     # -- assemblage ------------------------------------------------------------
 
-    def _valid(self, offers: list[Offer] | None, direction: str) -> list[Offer]:
+    def _valid(self, offers: list[Offer] | None) -> list[Offer]:
         good = [
             x for x in offers or []
-            if x.price is not None and slice_ok(x.slice, self.trip, direction)
+            if x.price is not None and slice_ok(x.slice, self.trip)
         ]
         return sorted(good, key=lambda x: x.price)
 
-    def _best(self, offers: list[Offer] | None, direction: str, n: int) -> list[Offer]:
+    def _best(self, offers: list[Offer] | None, n: int) -> list[Offer]:
         """Les n meilleures offres valides pour chaque limite d'escales des scénarios."""
-        valid, chosen = self._valid(offers, direction), {}
+        valid, chosen = self._valid(offers), {}
         for limit in self.stop_limits:
             for x in [x for x in valid if x.slice.stops <= limit][:n]:
                 chosen.setdefault(x.slice.key, x)
@@ -156,7 +156,7 @@ class Searcher:
         itins = []
         for key, offers in returns.items():
             out = tasks[key][0][0].selected
-            for ret in self._valid(offers, "retour"):
+            for ret in self._valid(offers):
                 itins.append(Itinerary(
                     "aller-retour", out, ret.slice, ret.price,
                     links=[self.gf.booking_url([out, ret.slice])]))
@@ -168,8 +168,8 @@ class Searcher:
             for a, b in product(self.trip.destinations, repeat=2):
                 if a != b and not self.trip.villes_differentes:
                     continue
-                outs = self._best(boards[("ow-out", d, a)], "aller", n)
-                rets = self._best(boards[("ow-ret", r, b)], "retour", n)
+                outs = self._best(boards[("ow-out", d, a)], n)
+                rets = self._best(boards[("ow-ret", r, b)], n)
                 for out, ret in product(outs, rets):
                     itins.append(Itinerary(
                         "2 allers simples", out.slice, ret.slice, out.price + ret.price,
@@ -181,11 +181,11 @@ class Searcher:
         Google ne permet plus d'interroger directement le multi-villes : on l'estime ainsi,
         avec le prix aller-retour affiché par Google vers chaque ville pour la même compagnie."""
 
-        def by_carrier(offers, limit, direction=None):
+        def by_carrier(offers, limit, check=True):
             best = {}
             for x in offers or []:
                 if x.price is None or x.slice.stops > limit or (
-                        direction and not slice_ok(x.slice, self.trip, direction)):
+                        check and not slice_ok(x.slice, self.trip)):
                     continue
                 c = x.slice.carrier
                 if c not in best or x.price < best[c].price:
@@ -197,9 +197,9 @@ class Searcher:
             for a, b in product(self.trip.destinations, repeat=2):
                 if a == b:
                     continue
-                outs = by_carrier(boards[("rt", d, r, a)], limit, "aller")  # aller valide vers a
-                rt_b = by_carrier(boards[("rt", d, r, b)], limit)  # prix aller-retour vers b
-                rets = by_carrier(boards[("ow-ret", r, b)], limit, "retour")  # retour depuis b
+                outs = by_carrier(boards[("rt", d, r, a)], limit)  # aller valide vers a
+                rt_b = by_carrier(boards[("rt", d, r, b)], limit, False)  # prix aller-retour vers b
+                rets = by_carrier(boards[("ow-ret", r, b)], limit)  # retour valide depuis b
                 for c in outs.keys() & rt_b.keys() & rets.keys():
                     out, ret = outs[c].slice, rets[c].slice
                     estimates.append(Itinerary(

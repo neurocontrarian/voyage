@@ -58,15 +58,16 @@ n'apparaissent qu'après 5 journées et 2 semaines de relevés.
    pour chaque trajet, le programme compare deux options. Soit on garde le tarif affiché et
    on paie les valises, soit on passe au tarif qui les inclut. Il retient la moins chère et
    indique ce que le tarif suivant apporterait (choix du siège, modifications…).
-4. **Préférence de qualité** : une compagnie peut être classée comme si elle coûtait plus
-   cher (`penalite_qualite` dans `config/compagnies.yaml`). C'est le cas de **TAP (+10 %)** :
-   3 étoiles Skytrax, 73e mondial en 2026, ponctualité parmi les plus faibles d'Europe.
-   TAP reste proposée et passe en tête si elle est vraiment moins chère. Le prix affiché reste
-   le vrai prix, et les alertes suivent ce classement.
-5. **Escales** (scénarios 3 et 4) :
-   - au plus une escale par trajet ;
-   - correspondance de 60 min à 3 h ;
-   - pas plus de 2 h de vol en plus qu'un direct.
+4. **Compagnies exclues** (`compagnies_exclues` dans `config/voyage.yaml`) : **TAP Air
+   Portugal** n'est jamais proposée, même pour un seul vol d'un trajet avec escale.
+   Une compagnie peut aussi être seulement classée comme si elle coûtait plus cher
+   (`penalite_qualite` dans `config/compagnies.yaml`) ; le prix affiché reste le vrai prix.
+5. **Durée** : dans tous les scénarios, chaque trajet (aller, retour) dure **10 h au plus**,
+   attente en escale comprise (`duree_trajet_max_minutes`). Scénarios 3 et 4 : au plus une
+   escale par trajet.
+
+Quand les règles d'un scénario changent (dates, durée, compagnies exclues…), son meilleur
+prix repart de zéro : la recherche suivante envoie une alerte avec le nouveau meilleur voyage.
 
 Les types de résultats :
 
@@ -86,7 +87,7 @@ compagnie** avant d'acheter, puis corriger `config/compagnies.yaml` si un montan
 ## Réutiliser pour un autre voyage
 
 Modifier [`config/voyage.yaml`](config/voyage.yaml) : aéroports, scénarios (dates, nuits, escales), passagers,
-valises, règles d'escale. Si une nouvelle compagnie ressort souvent, ajouter ses tarifs dans
+valises, durée maximale, compagnies exclues. Si une nouvelle compagnie ressort souvent, ajouter ses tarifs dans
 `config/compagnies.yaml` ; sinon une règle générique prudente s'applique. Supprimer
 `data/etat.json` pour repartir de zéro dans les alertes.
 

@@ -80,20 +80,19 @@ def test_porter_uses_transat_rules():
     assert AIRLINES["PD"]["tarifs"] == AIRLINES["TS"]["tarifs"]
 
 
-def test_connection_rules():
-    via_lis = Slice((
-        leg("TP254", "YUL", "LIS", "2027-03-25T22:45", "2027-03-26T09:40", 415),
-        leg("TP1926", "LIS", "OPO", "2027-03-26T12:30", "2027-03-26T13:30", 60),
+def test_trip_duration_and_excluded_airline():
+    via_cdg = Slice((
+        leg("AC870", "YUL", "CDG", "2027-03-25T19:00", "2027-03-26T07:50", 410),
+        leg("AF1528", "CDG", "LIS", "2027-03-26T09:20", "2027-03-26T11:00", 160),
     ))
-    assert slice_ok(via_lis, TRIP, "aller")
-    long_wait = replace(via_lis, legs=(via_lis.legs[0], replace(
-        via_lis.legs[1], dep=datetime(2027, 3, 26, 18, 0), arr=datetime(2027, 3, 26, 19, 0))))
-    assert not slice_ok(long_wait, TRIP, "aller")
-    detour = Slice((
-        leg("AF345", "YUL", "CDG", "2027-03-25T20:05", "2027-03-26T08:35", 450),
-        leg("AF1528", "CDG", "OPO", "2027-03-26T09:35", "2027-03-26T10:35", 120),
-    ))
-    assert not slice_ok(detour, TRIP, "aller")
+    assert via_cdg.total_minutes == 660 and not slice_ok(via_cdg, TRIP)  # 11 h : trop long
+    quick = replace(via_cdg, legs=(via_cdg.legs[0], replace(
+        via_cdg.legs[1], dep=datetime(2027, 3, 26, 8, 50), arr=datetime(2027, 3, 26, 10, 30),
+        minutes=100)))
+    assert quick.total_minutes == 570 and slice_ok(quick, TRIP)  # 9 h 30
+    assert slice_ok(OUT_AC, TRIP) and not slice_ok(OUT, TRIP)  # TAP exclue
+    tap_leg = replace(quick, legs=(quick.legs[0], replace(quick.legs[1], airline="TP")))
+    assert not slice_ok(tap_leg, TRIP)  # exclue même pour un seul vol du trajet
 
 
 def back(day):
@@ -170,3 +169,11 @@ def test_report_and_alert_show_shared_best_once():
     assert "Aucun vol trouvé" in text and all(sc.titre in text for sc in TRIP.scenarios)
     alert = alert_message([(FIXED, direct, None), (FIXED_STOP, direct, None)], TRIP, AIRLINES)
     assert alert.count("tout compris") == 1 and "Le même voyage qu'au scénario 1" in alert
+
+
+def test_record_reset_when_scenario_rules_change():
+    from voyage.__main__ import rules_id
+    assert rules_id(TRIP, FIXED) == rules_id(load_trip(), FIXED)
+    assert rules_id(TRIP, FIXED) != rules_id(TRIP, FIXED_STOP)
+    assert rules_id(TRIP, FIXED) != rules_id(replace(TRIP, compagnies_exclues=[]), FIXED)
+    assert rules_id(TRIP, FIXED) != rules_id(replace(TRIP, duree_trajet_max_minutes=660), FIXED)

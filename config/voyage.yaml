@@ -38,14 +38,10 @@ passagers: 3                    # 2 adultes + 1 ado de 14 ans (tarif adulte dès
 bagages_soute: 2                # nombre total de valises en soute pour le groupe
 devise: CAD
 
-# Règles des escales (scénarios qui en permettent).
-escales:
-  correspondance_min_minutes: 60
-  correspondance_max_minutes: 180
-  # Temps de vol (hors attente en correspondance) toléré au-delà d'un vol direct.
-  temps_de_vol_en_plus_max_minutes: 120
-  # Durée d'un vol direct de référence, pour mesurer le détour.
-  duree_vol_direct_minutes: {aller: 400, retour: 450}
+# Durée totale maximale de chaque trajet (aller, retour), escale comprise, dans tous les scénarios.
+duree_trajet_max_minutes: 600   # 10 h
+
+compagnies_exclues: [TP]        # jamais proposées (même pour un seul vol du trajet) : TAP Air Portugal
 
 recherche:
   # Les nombres ci-dessous valent pour les vols directs, et à nouveau pour les vols avec escale.
