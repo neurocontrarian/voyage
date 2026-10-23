@@ -29,15 +29,50 @@ def load_state() -> dict:
 
 
 @dataclass(frozen=True)
+class Scenario:
+    """Une variante du voyage : dates permises et nombre d'escales par trajet."""
+    numero: int
+    nom: str
+    depart_du: date
+    retour_au: date  # arrivée à Montréal au plus tard
+    escales_max: int
+    depart_au: date | None = None  # par défaut : aucune limite autre que le retour
+    retour_du: date | None = None  # arrivée à Montréal au plus tôt
+    nuits_min: int = 0
+
+    @property
+    def titre(self) -> str:
+        return f"Scénario {self.numero} : {self.nom}"
+
+    @property
+    def dernier_depart(self) -> date:
+        return self.depart_au or self.retour_au
+
+    @property
+    def premier_retour(self) -> date:
+        return self.retour_du or self.depart_du
+
+    def date_pairs(self) -> list[tuple[date, date]]:
+        """Couples (date de départ, date du vol retour). Les vols vers l'Europe arrivent le
+        lendemain du départ, d'où le +1 pour compter les nuits sur place ; les retours arrivent
+        à Montréal le jour même."""
+        pairs, dep = [], self.depart_du
+        while dep <= self.dernier_depart:
+            ret = max(self.premier_retour, dep + timedelta(days=self.nuits_min + 1))
+            while ret <= self.retour_au:
+                pairs.append((dep, ret))
+                ret += timedelta(days=1)
+            dep += timedelta(days=1)
+        return pairs
+
+
+@dataclass(frozen=True)
 class Trip:
     nom: str
     origine: str
     destinations: list[str]
     villes_differentes: bool
-    depart: date
-    retour_au_plus_tard: date
-    nuits: int
-    nuit_en_moins_economie_min: float
+    scenarios: list[Scenario]
     passagers: int
     bagages_soute: int
     devise: str
@@ -45,15 +80,14 @@ class Trip:
     recherche: dict
     alerte: dict
 
-    def date_pairs(self) -> list[tuple[date, date]]:
-        """Couples (date de départ, date du vol retour) : le nombre de nuits prévu, et une nuit
-        de moins. Les vols vers l'Europe arrivent le lendemain du départ, d'où le +1."""
-        returns = (self.depart + timedelta(days=self.nuits + 1 - fewer) for fewer in (0, 1))
-        return [(self.depart, r) for r in returns if r <= self.retour_au_plus_tard]
+    @property
+    def escales_max(self) -> int:
+        return max(s.escales_max for s in self.scenarios)
 
 
 def load_trip(path: Path | None = None) -> Trip:
     data = yaml.safe_load((path or ROOT / "config" / "voyage.yaml").read_text())
+    data["scenarios"] = [Scenario(numero=n, **s) for n, s in enumerate(data["scenarios"], 1)]
     return Trip(**data)
 
 

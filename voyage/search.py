@@ -10,35 +10,50 @@ from itertools import product
 
 from fli.search._concurrency import parallel_map
 
-from voyage.config import Trip
+from voyage.config import Scenario, Trip
 from voyage.gflights import GoogleFlights, Offer, Segment
 from voyage.pricing import Itinerary, price_itinerary
-from voyage.rules import dates_ok, keep_worthwhile, slice_ok
+from voyage.rules import fits, slice_ok
 
 log = logging.getLogger(__name__)
 WORKERS = 4
 
 
 @dataclass
+class ScenarioResult:
+    scenario: Scenario
+    itineraries: list[Itinerary]  # du meilleur au moins bon (classement avec préférences)
+    # Meilleure option arrivée/départ de villes différentes, affichée pour info.
+    best_two_cities: Itinerary | None = None
+
+
+@dataclass
 class Outcome:
-    itineraries: list[Itinerary]
+    scenarios: list[ScenarioResult]
     requests: int = 0
     errors: list[str] = field(default_factory=list)
-    # Meilleure option arrivée/départ de villes différentes, même écartée par la règle des escales.
-    best_two_cities: Itinerary | None = None
+
+    @property
+    def itineraries(self) -> list[Itinerary]:
+        """Tous les itinéraires retenus par au moins un scénario, du meilleur au moins bon."""
+        unique = {id(i): i for r in self.scenarios for i in r.itineraries}
+        return sorted(unique.values(), key=lambda i: i.score)
 
 
 class Searcher:
     def __init__(self, trip: Trip, airlines: dict, gf: GoogleFlights):
         self.trip, self.airlines, self.gf = trip, airlines, gf
         self.requests, self.errors = 0, []
+        # Limites d'escales des scénarios : les meilleurs vols sont choisis pour chacune, sinon
+        # les vols avec escale, moins chers, cacheraient les directs.
+        self.stop_limits = sorted({s.escales_max for s in trip.scenarios})
 
     # -- requêtes --------------------------------------------------------------
 
     def _segment(self, origin: str, dest: str, day: date, selected=None) -> Segment:
         # Les durées de correspondance sont filtrées ici et non par Google : en aller-retour,
         # son filtre écarte un aller dès que le meilleur retour associé ne le respecte pas.
-        return Segment(origin, dest, day.isoformat(), self.trip.escales["max"], selected=selected)
+        return Segment(origin, dest, day.isoformat(), self.trip.escales_max, selected=selected)
 
     def _fetch_all(self, tasks: dict) -> dict:
         """tasks : clé -> (segments, one_way, exclude_basic). Les échecs donnent None."""
@@ -64,7 +79,7 @@ class Searcher:
 
     def run(self) -> Outcome:
         trip, o = self.trip, self.trip.origine
-        pairs = trip.date_pairs()
+        pairs = sorted({p for sc in trip.scenarios for p in sc.date_pairs()})
         cities = trip.destinations
         dep_days = sorted({d for d, _ in pairs})
         ret_days = sorted({r for _, r in pairs})
@@ -83,7 +98,7 @@ class Searcher:
         # 2. Retours des meilleurs allers.
         tasks, k = {}, trip.recherche["allers_detailles"]
         for (d, r), city in product(pairs, cities):
-            outs = self._valid(boards[("rt", d, r, city)], "aller")[:k]
+            outs = self._best(boards[("rt", d, r, city)], "aller", k)
             for out in outs:
                 tasks[("rt-ret", d, r, city, out.slice.key)] = (
                     [self._segment(o, city, d, out.slice), self._segment(city, o, r)], False, False)
@@ -93,20 +108,28 @@ class Searcher:
         itins += self._one_way_pairs(pairs, boards)
         if trip.villes_differentes:
             itins += self._open_jaw_estimates(pairs, boards)
-        itins = [i for i in itins if dates_ok(i, trip)]
+        itins = [i for i in itins if any(fits(i, sc) for sc in trip.scenarios)]
         itins = self._dedupe(itins)
         for itin in itins:
             self._price(itin)
         itins.sort(key=lambda i: i.score)
 
-        to_check = keep_worthwhile(itins, trip)[: trip.recherche["verifier_tarif_de_base"]]
-        two_cities = self._best_two_cities(itins)
-        if two_cities and two_cities not in to_check:
-            to_check.append(two_cities)
-        self._check_basic(to_check)
+        n = trip.recherche["verifier_tarif_de_base"]
+        to_check = {}
+        for result in self._by_scenario(itins):
+            for i in result.itineraries[:n] + [result.best_two_cities]:
+                if i is not None:
+                    to_check[id(i)] = i
+        self._check_basic(list(to_check.values()))
         itins.sort(key=lambda i: i.score)
-        return Outcome(keep_worthwhile(itins, trip), self.requests, self.errors,
-                       self._best_two_cities(itins))
+        return Outcome(self._by_scenario(itins), self.requests, self.errors)
+
+    def _by_scenario(self, itins: list[Itinerary]) -> list[ScenarioResult]:
+        results = []
+        for sc in self.trip.scenarios:
+            mine = [i for i in itins if fits(i, sc)]
+            results.append(ScenarioResult(sc, mine, self._best_two_cities(mine)))
+        return results
 
     @staticmethod
     def _best_two_cities(itins: list[Itinerary]) -> Itinerary | None:
@@ -120,6 +143,14 @@ class Searcher:
             if x.price is not None and slice_ok(x.slice, self.trip, direction)
         ]
         return sorted(good, key=lambda x: x.price)
+
+    def _best(self, offers: list[Offer] | None, direction: str, n: int) -> list[Offer]:
+        """Les n meilleures offres valides pour chaque limite d'escales des scénarios."""
+        valid, chosen = self._valid(offers, direction), {}
+        for limit in self.stop_limits:
+            for x in [x for x in valid if x.slice.stops <= limit][:n]:
+                chosen.setdefault(x.slice.key, x)
+        return sorted(chosen.values(), key=lambda x: x.price)
 
     def _round_trips(self, tasks: dict, returns: dict) -> list[Itinerary]:
         itins = []
@@ -137,8 +168,8 @@ class Searcher:
             for a, b in product(self.trip.destinations, repeat=2):
                 if a != b and not self.trip.villes_differentes:
                     continue
-                outs = self._valid(boards[("ow-out", d, a)], "aller")[:n]
-                rets = self._valid(boards[("ow-ret", r, b)], "retour")[:n]
+                outs = self._best(boards[("ow-out", d, a)], "aller", n)
+                rets = self._best(boards[("ow-ret", r, b)], "retour", n)
                 for out, ret in product(outs, rets):
                     itins.append(Itinerary(
                         "2 allers simples", out.slice, ret.slice, out.price + ret.price,
@@ -150,10 +181,11 @@ class Searcher:
         Google ne permet plus d'interroger directement le multi-villes : on l'estime ainsi,
         avec le prix aller-retour affiché par Google vers chaque ville pour la même compagnie."""
 
-        def by_carrier(offers, direction=None):
+        def by_carrier(offers, limit, direction=None):
             best = {}
             for x in offers or []:
-                if x.price is None or (direction and not slice_ok(x.slice, self.trip, direction)):
+                if x.price is None or x.slice.stops > limit or (
+                        direction and not slice_ok(x.slice, self.trip, direction)):
                     continue
                 c = x.slice.carrier
                 if c not in best or x.price < best[c].price:
@@ -161,13 +193,13 @@ class Searcher:
             return best
 
         estimates = []
-        for d, r in pairs:
+        for (d, r), limit in product(pairs, self.stop_limits):
             for a, b in product(self.trip.destinations, repeat=2):
                 if a == b:
                     continue
-                outs = by_carrier(boards[("rt", d, r, a)], "aller")  # aller valide vers a
-                rt_b = by_carrier(boards[("rt", d, r, b)])  # niveau de prix aller-retour vers b
-                rets = by_carrier(boards[("ow-ret", r, b)], "retour")  # retour valide depuis b
+                outs = by_carrier(boards[("rt", d, r, a)], limit, "aller")  # aller valide vers a
+                rt_b = by_carrier(boards[("rt", d, r, b)], limit)  # prix aller-retour vers b
+                rets = by_carrier(boards[("ow-ret", r, b)], limit, "retour")  # retour depuis b
                 for c in outs.keys() & rt_b.keys() & rets.keys():
                     out, ret = outs[c].slice, rets[c].slice
                     estimates.append(Itinerary(

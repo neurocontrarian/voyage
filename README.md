@@ -13,18 +13,26 @@ publier les alertes, pour que le courriel parte (GitHub ne notifie pas ses propr
 au propriétaire), et faire le veilleur, avec un ticket « panne » si le serveur n'a rien
 publié depuis 3 h.
 
-Voyage surveillé actuellement : Montréal → Portugal (Lisbonne ou Porto), départ le jeudi
-25 mars 2027, arrivée à Montréal le 2 avril au plus tard, 7 nuits sur place (6 nuits seulement si
-le total est au moins 15 % moins cher), 3 passagers, 2 valises en soute.
+Voyage surveillé actuellement : Montréal → Portugal (Lisbonne ou Porto), 3 passagers,
+2 valises en soute, selon 4 scénarios suivis séparément (chacun a son meilleur prix et ses alertes) :
+
+| Scénario | Dates | Escales |
+|---|---|---|
+| 1 | départ le jeudi 25 mars 2027, retour à Montréal le 2 avril | vols directs |
+| 2 | au moins 6 nuits sur place, départ dès le 25 mars, retour à Montréal au plus tard le 3 avril | vols directs |
+| 3 | comme le 1 | 1 escale permise par trajet |
+| 4 | comme le 2 | 1 escale permise par trajet |
+
+Quand deux scénarios ont le même meilleur voyage, sa fiche n'est affichée qu'une fois.
 
 ## Où voir les résultats
 
 | Quoi | Où |
 |---|---|
 | Alertes (nouveau meilleur prix) | ticket **« ✈️ Alertes prix »** (étiquette `alerte-prix`) |
-| Rappel quotidien à 17 h (meilleure offre de tous les temps + du jour) | même ticket, un commentaire par jour, même sans nouveau record |
+| Rappel quotidien à 17 h (par scénario : meilleure offre de tous les temps + du jour) | même ticket, un commentaire par jour, même sans nouveau record |
 | Tendances (meilleure heure / meilleur jour pour acheter) | [`data/tendances.md`](data/tendances.md), résumé dans le rappel de 17 h |
-| Dernière recherche, top 5 détaillé | [`data/dernier_resultat.md`](data/dernier_resultat.md) |
+| Dernière recherche, top 5 de chaque scénario | [`data/dernier_resultat.md`](data/dernier_resultat.md) |
 | Historique heure par heure | [`data/historique.csv`](data/historique.csv) |
 | Panne (serveur éteint, Google a changé…) | ticket **« ⚠️ … ne fonctionne plus »** (étiquette `panne`) |
 
@@ -55,11 +63,10 @@ n'apparaissent qu'après 5 journées et 2 semaines de relevés.
    3 étoiles Skytrax, 73e mondial en 2026, ponctualité parmi les plus faibles d'Europe.
    TAP reste proposée et passe en tête si elle est vraiment moins chère. Le prix affiché reste
    le vrai prix, et les alertes suivent ce classement.
-5. **Escales** :
+5. **Escales** (scénarios 3 et 4) :
    - au plus une escale par trajet ;
    - correspondance de 60 min à 3 h ;
-   - pas plus de 2 h de vol en plus qu'un direct ;
-   - et seulement si le total est **au moins 15 % moins cher** que le meilleur direct.
+   - pas plus de 2 h de vol en plus qu'un direct.
 
 Les types de résultats :
 
@@ -70,8 +77,7 @@ Les types de résultats :
   compagnie. Depuis août 2026, Google ne laisse plus interroger ce mode sans navigateur.
   On l'estime donc selon la règle tarifaire des compagnies (moitié de l'aller-retour vers
   chaque ville). À réserver en « multi-destinations » sur le site de la compagnie.
-- La meilleure option **villes différentes** est toujours affichée « pour info », même si son
-  escale ne passe pas la règle des 15 %.
+- La meilleure option **villes différentes** de chaque scénario est toujours affichée « pour info ».
 
 ⚠️ Les montants marqués « estimé » (frais de valise de certains tarifs, écarts entre tarifs)
 viennent des règles publiées ou observées. Il faut **vérifier le prix final sur le site de la
@@ -79,7 +85,7 @@ compagnie** avant d'acheter, puis corriger `config/compagnies.yaml` si un montan
 
 ## Réutiliser pour un autre voyage
 
-Modifier [`config/voyage.yaml`](config/voyage.yaml) : aéroports, date de départ, nuits, passagers,
+Modifier [`config/voyage.yaml`](config/voyage.yaml) : aéroports, scénarios (dates, nuits, escales), passagers,
 valises, règles d'escale. Si une nouvelle compagnie ressort souvent, ajouter ses tarifs dans
 `config/compagnies.yaml` ; sinon une règle générique prudente s'applique. Supprimer
 `data/etat.json` pour repartir de zéro dans les alertes.

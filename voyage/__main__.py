@@ -15,11 +15,11 @@ from voyage.config import DATA, HISTORY, STATE, TZ, load_airlines, load_state, l
 from voyage.gflights import GoogleFlights, Slice
 from voyage.notify import PANNE, notifier, post_alerte
 from voyage.pricing import Itinerary
-from voyage.search import Searcher
+from voyage.search import ScenarioResult, Searcher
 
 REPORT = DATA / "dernier_resultat.md"
 CITY = {
-    "YUL": "Montréal", "LIS": "Lisbonne", "OPO": "Porto", "FAO": "Faro", "PDL": "Ponta Delgada",
+    "YUL": "Montréal", "LIS": "Lisbonne", "CMN": "Casablanca", "PDL": "Ponta Delgada", "OPO": "Porto", "FAO": "Faro",
     "YYZ": "Toronto", "BOS": "Boston", "EWR": "Newark", "JFK": "New York", "PHL": "Philadelphie",
     "IAD": "Washington", "MAD": "Madrid", "CDG": "Paris", "LHR": "Londres", "FRA": "Francfort",
 }
@@ -101,29 +101,53 @@ def card(i: Itinerary, trip, airlines: dict) -> str:
             f"| | |\n|---|---|\n{table}\n\n{links(i)}")
 
 
-def summary_row(i: Itinerary, airlines: dict, note: str = "") -> str:
-    stops = "direct" if i.stops == 0 else f"{i.stops} escale" + ("s" if i.stops > 1 else "")
+def stops_text(i: Itinerary) -> str:
+    out, ret = i.out.stops, i.ret.stops
+    if not out and not ret:
+        return "direct"
+    return "escale " + ("aller et retour" if out and ret else "à l'aller" if out else "au retour")
+
+
+def summary_cells(i: Itinerary, airlines: dict) -> list[str]:
     cities = " / ".join(dict.fromkeys([city(i.out.dest), city(i.ret.origin)]))
     company = both(airlines_of(i.out, airlines), airlines_of(i.ret, airlines))
-    return (f"| {money(i.total)}{note} | {company} | {i.out.legs[0].dep.day}/{i.out.legs[0].dep.month}"
-            f" → {i.ret.legs[0].dep.day}/{i.ret.legs[0].dep.month} | {stops} | {cities} |")
+    dep, ret = i.out.legs[0].dep, i.ret.legs[0].dep
+    return [money(i.total), company, f"{dep.day}/{dep.month} → {ret.day}/{ret.month}",
+            stops_text(i), cities]
+
+
+def summary_row(i: Itinerary, airlines: dict, note: str = "") -> str:
+    cells = summary_cells(i, airlines)
+    cells[0] += note
+    return "| " + " | ".join(cells) + " |"
+
+
+def summary_line(i: Itinerary, airlines: dict) -> str:
+    """Le voyage en une ligne (rappel de 17 h)."""
+    return " · ".join(summary_cells(i, airlines))
 
 
 FOOTER = ("_Prix = Google Flights taxes incluses + valises selon le tarif indiqué. "
           "Vérifier sur le site de la compagnie avant d'acheter._")
 
 
-def report(trip, outcome, airlines: dict, now: datetime) -> str:
-    """Contenu de data/dernier_resultat.md : la fiche du meilleur voyage, puis les suivants."""
-    if not outcome.itineraries:
-        return f"## {trip.nom} — {now:%Y-%m-%d %H:%M}\n\nAucun résultat."
-    best, others = outcome.itineraries[0], outcome.itineraries[1: trip.alerte["top"]]
+def scenario_section(r: ScenarioResult, trip, airlines: dict, shown: dict) -> list[str]:
+    """Fiche du meilleur voyage du scénario, puis les suivants. ``shown`` : clé -> numéro du
+    scénario dont la fiche est déjà affichée (pour ne pas répéter la même fiche)."""
+    lines = ["", f"## {r.scenario.titre}", ""]
+    if not r.itineraries:
+        return lines + ["Aucun vol trouvé sur Google Flights pour ce scénario."]
+    best, others = r.itineraries[0], r.itineraries[1: trip.alerte["top"]]
+    if best.key in shown:
+        lines.append(f"Meilleur voyage : {money(best.total)}, le même qu'au scénario {shown[best.key]}.")
+    else:
+        shown[best.key] = r.scenario.numero
+        lines.append(card(best, trip, airlines))
     # † : moins cher que le premier choix, mais classé après à cause d'une préférence qualité.
     rows = [summary_row(i, airlines, " †" if i.total < best.total else "") for i in others]
-    two = outcome.best_two_cities
+    two = r.best_two_cities
     if two and two is not best and two not in others:
         rows.append(summary_row(two, airlines, " *"))
-    lines = [f"## {trip.nom} — recherche du {now:%Y-%m-%d à %H:%M}", "", card(best, trip, airlines)]
     if rows:
         lines += ["", "#### Autres options", "",
                   "| Prix | Compagnie | Dates | Escales | Villes |", "|---|---|---|---|---|", *rows]
@@ -131,16 +155,41 @@ def report(trip, outcome, airlines: dict, now: datetime) -> str:
             penalized = ", ".join(f"{p['nom']} +{p['penalite_qualite'] * 100:.0f} %"
                                   for p in airlines.values() if p.get("penalite_qualite"))
             lines.append(f"\n† moins cher, mais classé après (préférence qualité : {penalized})")
-        if two and two not in outcome.itineraries:
-            lines.append("\n\\* deux villes différentes ; l'escale ne fait pas économiser 15 % "
-                         "par rapport au meilleur vol direct")
+        if two and two is not best and two not in others:
+            lines.append("\n\\* meilleure option avec deux villes différentes")
+    return lines
+
+
+def report(trip, outcome, airlines: dict, now: datetime) -> str:
+    """Contenu de data/dernier_resultat.md : pour chaque scénario, la fiche du meilleur voyage,
+    puis les suivants."""
+    lines, shown = [f"# {trip.nom} — recherche du {now:%Y-%m-%d à %H:%M}"], {}
+    for r in outcome.scenarios:
+        lines += scenario_section(r, trip, airlines, shown)
     return "\n".join([*lines, "", FOOTER])
 
 
-def entry(best: Itinerary, now: datetime, fiche: str) -> dict:
+def entry(best: Itinerary, now: datetime, fiche: str, airlines: dict) -> dict:
     """Ce qu'on retient d'une offre dans etat.json (record ou meilleure offre du jour)."""
     return {"date": f"{now:%Y-%m-%d %H:%M}", "total": round(best.total), "score": round(best.score),
-            "cle": best.key, "fiche": fiche}
+            "cle": best.key, "fiche": fiche, "resume": summary_line(best, airlines)}
+
+
+def alert_message(news: list, trip, airlines: dict) -> str:
+    """news : (scénario, meilleur voyage, ancien record ou None) des scénarios améliorés."""
+    parts, shown = [], {}
+    for sc, best, previous in news:
+        head = f"**Nouveau meilleur prix — {sc.titre}**"
+        if previous:
+            counted = (f", compté {money(previous['score'])}"
+                       if previous["score"] != previous["total"] else "")
+            head += f" (précédent : {money(previous['total'])}{counted}, le {previous['date']})"
+        if best.key in shown:
+            parts.append(f"{head}\n\nLe même voyage qu'au scénario {shown[best.key]}.")
+        else:
+            shown[best.key] = sc.numero
+            parts.append(f"{head}\n\n{card(best, trip, airlines)}")
+    return "\n\n---\n\n".join([*parts, FOOTER])
 
 
 def append_history(now, best, best_direct, outcome) -> None:
@@ -194,26 +243,30 @@ def main() -> int:
 
     state["echecs"] = 0
     REPORT.write_text(text + "\n")
-    # Le record porte sur le classement (prix + préférences de qualité). Un ancien état sans
-    # « score » date d'avant les préférences : on repart d'un nouveau classement.
-    fiche = card(best, trip, airlines)
-    record = state.get("record") if "score" in state.get("record", {}) else None
-    if record is None or best.score <= record["score"] - trip.alerte["baisse_min"]:
-        if record:
-            counted = f", compté {money(record['score'])}" if record["score"] != record["total"] else ""
-            previous = f" (précédent : {money(record['total'])}{counted}, le {record['date']})"
-        elif state.get("record"):
-            previous = " (classement recalculé avec les préférences de qualité des compagnies)"
-        else:
-            previous = ""
-        post_alerte(trip, f"**Nouveau meilleur prix**{previous}\n\n{fiche}\n\n{FOOTER}")
-        state["record"] = entry(best, now, fiche)
-    elif "fiche" not in record and best.key == record["cle"]:
-        record["fiche"] = fiche  # fiche manquante (record d'avant le rappel)
-    # Meilleure offre de la journée, pour le rappel de 17 h.
-    today = state.get("jour")
-    if not today or not today["date"].startswith(f"{now:%Y-%m-%d}") or best.score < today["score"]:
-        state["jour"] = entry(best, now, fiche)
+    # Record et meilleure offre du jour de chaque scénario. Le record porte sur le classement
+    # (prix + préférences de qualité). Un scénario renommé repart de zéro.
+    for legacy in ("record", "jour"):  # état d'avant les scénarios
+        state.pop(legacy, None)
+    old, news = state.get("scenarios", {}), []
+    state["scenarios"] = {}
+    for r in outcome.scenarios:
+        sc, number = r.scenario, str(r.scenario.numero)
+        mine = old.get(number) or {}
+        if mine.get("nom") != sc.nom:
+            mine = {"nom": sc.nom}
+        state["scenarios"][number] = mine
+        if not r.itineraries:
+            continue
+        best = r.itineraries[0]
+        fiche, record = card(best, trip, airlines), mine.get("record")
+        if record is None or best.score <= record["score"] - trip.alerte["baisse_min"]:
+            news.append((sc, best, record))
+            mine["record"] = entry(best, now, fiche, airlines)
+        today = mine.get("jour")
+        if not today or not today["date"].startswith(f"{now:%Y-%m-%d}") or best.score < today["score"]:
+            mine["jour"] = entry(best, now, fiche, airlines)
+    if news:
+        post_alerte(trip, alert_message(news, trip, airlines))
     state["derniere_execution"] = now.isoformat(timespec="minutes")
     STATE.write_text(json.dumps(state, indent=2, ensure_ascii=False))
     return 0

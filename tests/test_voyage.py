@@ -4,9 +4,10 @@ from datetime import date, datetime
 from voyage.config import load_airlines, load_trip
 from voyage.gflights import Leg, Slice
 from voyage.pricing import Itinerary, bag_cost, price_itinerary
-from voyage.rules import dates_ok, keep_worthwhile, slice_ok
+from voyage.rules import fits, slice_ok
 
 TRIP = load_trip()
+FIXED, FLEX, FIXED_STOP, FLEX_STOP = TRIP.scenarios
 AIRLINES = load_airlines()
 
 
@@ -21,9 +22,13 @@ OUT_AC = Slice((leg("AC812", "YUL", "LIS", "2027-03-25T22:40", "2027-03-26T09:20
 RET_AC = Slice((leg("AC813", "LIS", "YUL", "2027-04-02T11:25", "2027-04-02T13:50", 445),))
 
 
-def test_date_pairs_fixed_departure_and_one_night_less():
-    assert TRIP.date_pairs() == [(date(2027, 3, 25), date(2027, 4, 2)),
-                                 (date(2027, 3, 25), date(2027, 4, 1))]
+def test_date_pairs_of_each_scenario():
+    assert FIXED.date_pairs() == FIXED_STOP.date_pairs() == [(date(2027, 3, 25), date(2027, 4, 2))]
+    assert FLEX.date_pairs() == FLEX_STOP.date_pairs() == [
+        (date(2027, 3, 25), date(2027, 4, 1)), (date(2027, 3, 25), date(2027, 4, 2)),
+        (date(2027, 3, 25), date(2027, 4, 3)), (date(2027, 3, 26), date(2027, 4, 2)),
+        (date(2027, 3, 26), date(2027, 4, 3)), (date(2027, 3, 27), date(2027, 4, 3))]
+    assert [s.escales_max for s in TRIP.scenarios] == [0, 0, 1, 1]
 
 
 def test_bag_cost_first_bags_then_second_bags():
@@ -91,33 +96,28 @@ def test_connection_rules():
     assert not slice_ok(detour, TRIP, "aller")
 
 
-def test_connection_kept_only_if_15_percent_cheaper():
-    direct = Itinerary("aller-retour", OUT, RET, 0, total=3000)
+def back(day):
+    return Slice((leg("TP253", "LIS", "YUL", f"2027-{day}T18:25", f"2027-{day}T21:10", 465),))
+
+
+def test_scenario_dates_and_nights():
+    fixed = Itinerary("aller-retour", OUT, RET, 0)  # 25 mars -> 2 avril, 7 nuits
+    assert all(fits(fixed, sc) for sc in TRIP.scenarios)
+    one_less = Itinerary("aller-retour", OUT, back("04-01"), 0)  # 6 nuits
+    assert fits(one_less, FLEX) and not fits(one_less, FIXED)
+    assert not fits(Itinerary("aller-retour", OUT, back("03-31"), 0), FLEX)  # 5 nuits
+    late = Slice((leg("TP254", "YUL", "LIS", "2027-03-27T22:45", "2027-03-28T09:40", 415),))
+    assert fits(Itinerary("aller-retour", late, back("04-03"), 0), FLEX)  # 27 mars -> 3 avril
+    assert not fits(Itinerary("aller-retour", late, back("04-03"), 0), FIXED)
+    assert not fits(Itinerary("aller-retour", late, back("04-02"), 0), FLEX)  # 5 nuits
+    assert not fits(Itinerary("aller-retour", OUT, back("04-04"), 0), FLEX)  # retour trop tard
+
+
+def test_stops_allowed_only_in_scenarios_3_and_4():
     via = Slice((OUT.legs[0], leg("TP1926", "LIS", "OPO", "2027-03-26T12:30",
                                   "2027-03-26T13:30", 60)))
-    cheap = Itinerary("aller-retour", via, RET, 0, total=2500)
-    pricey = Itinerary("aller-retour", via, RET, 0, total=2700)
-    kept = keep_worthwhile([direct, cheap, pricey], TRIP)
-    assert cheap in kept and pricey not in kept and direct in kept
-
-
-def test_nights_and_departure_date():
-    assert dates_ok(Itinerary("aller-retour", OUT, RET, 0), TRIP)  # 7 nuits
-    one_less = Slice((leg("TP253", "LIS", "YUL", "2027-04-01T18:25", "2027-04-01T21:10", 465),))
-    two_less = Slice((leg("TP253", "LIS", "YUL", "2027-03-31T18:25", "2027-03-31T21:10", 465),))
-    assert dates_ok(Itinerary("aller-retour", OUT, one_less, 0), TRIP)  # 6 nuits
-    assert not dates_ok(Itinerary("aller-retour", OUT, two_less, 0), TRIP)
-    next_day = Slice((leg("TP254", "YUL", "LIS", "2027-03-26T22:45", "2027-03-27T09:40", 415),))
-    assert not dates_ok(Itinerary("aller-retour", next_day, RET, 0), TRIP)  # départ le 26 : refusé
-
-
-def test_one_night_less_kept_only_if_15_percent_cheaper():
-    one_less = Slice((leg("TP253", "LIS", "YUL", "2027-04-01T18:25", "2027-04-01T21:10", 465),))
-    full = Itinerary("aller-retour", OUT, RET, 0, total=3000)
-    short_cheap = Itinerary("aller-retour", OUT, one_less, 0, total=2550)
-    short_close = Itinerary("aller-retour", OUT, one_less, 0, total=2600)
-    kept = keep_worthwhile([full, short_cheap, short_close], TRIP)
-    assert full in kept and short_cheap in kept and short_close not in kept
+    itin = Itinerary("aller-retour", via, RET, 0)
+    assert [fits(itin, sc) for sc in TRIP.scenarios] == [False, False, True, True]
 
 
 def test_trends_hour_and_weekday_effects():
@@ -139,12 +139,34 @@ def test_daily_reminder_message():
     from voyage import rappel
     now = datetime(2026, 11, 3, 17, 0)
     record = {"total": 2900, "cle": "a", "date": "2026-11-01 10:17", "fiche": "FICHE-RECORD"}
-    today = {"date": "2026-11-03 09:17", "total": 3000, "cle": "b", "fiche": "FICHE-JOUR"}
-    both = rappel.message({"record": record, "jour": today}, now, "TENDANCES")
-    assert "FICHE-RECORD" in both and "FICHE-JOUR" in both and "TENDANCES" in both
-    same = rappel.message({"record": record, "jour": {**today, "cle": "a", "total": 2900}}, now, "T")
-    assert same.count("FICHE-RECORD") == 1 and "FICHE-JOUR" not in same
-    cheaper_record = rappel.message({"record": {**record, "total": 2800}, "jour": {**today, "cle": "a"}}, now, "T")
-    assert "FICHE-JOUR" in cheaper_record  # même vol, mais prix du jour différent du record
-    stale = rappel.message({"record": record, "jour": {**today, "date": "2026-11-02 09:17"}}, now, "T")
-    assert "Aucune recherche réussie aujourd'hui" in stale
+    today = {"date": "2026-11-03 09:17", "total": 3000, "cle": "b", "fiche": "F", "resume": "LIGNE-JOUR"}
+
+    def msg(*scenarios):
+        return rappel.message({"scenarios": {str(n): {"nom": f"NOM{n}", **sc}
+                                             for n, sc in enumerate(scenarios, 1)}}, now, "TENDANCES")
+
+    text = msg({"record": record, "jour": today})
+    assert "FICHE-RECORD" in text and "LIGNE-JOUR" in text and "TENDANCES" in text and "NOM1" in text
+    same = msg({"record": record, "jour": {**today, "cle": "a", "total": 2900}})
+    assert "aussi la meilleure offre du jour" in same and "LIGNE-JOUR" not in same
+    cheaper_record = msg({"record": {**record, "total": 2800}, "jour": {**today, "cle": "a"}})
+    assert "LIGNE-JOUR" in cheaper_record  # même vol, mais prix du jour différent du record
+    stale = msg({"record": record, "jour": {**today, "date": "2026-11-02 09:17"}})
+    assert "aucune recherche réussie" in stale
+    shared = msg({"record": record}, {"record": record})  # même record : une seule fiche
+    assert shared.count("FICHE-RECORD") == 1 and "la même qu'au scénario 1" in shared
+    assert "Aucun vol trouvé jusqu'ici" in msg({"record": record}, {})
+
+
+def test_report_and_alert_show_shared_best_once():
+    from voyage.__main__ import alert_message, report
+    from voyage.search import Outcome, ScenarioResult
+    direct = Itinerary("aller-retour", OUT_AC, RET_AC, 2961)
+    price_itinerary(direct, AIRLINES, 3, 2)
+    results = [ScenarioResult(sc, [direct] if sc.escales_max == 0 or sc is FIXED_STOP else [])
+               for sc in TRIP.scenarios]
+    text = report(TRIP, Outcome(results), AIRLINES, datetime(2026, 11, 3, 9, 17))
+    assert text.count("tout compris") == 1 and "le même qu'au scénario 1" in text
+    assert "Aucun vol trouvé" in text and all(sc.titre in text for sc in TRIP.scenarios)
+    alert = alert_message([(FIXED, direct, None), (FIXED_STOP, direct, None)], TRIP, AIRLINES)
+    assert alert.count("tout compris") == 1 and "Le même voyage qu'au scénario 1" in alert
