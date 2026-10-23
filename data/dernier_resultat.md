@@ -1,4 +1,4 @@
-## Portugal printemps 2027 — recherche du 2026-10-22 à 23:17
+## Portugal printemps 2027 — recherche du 2026-10-23 à 00:17
 
 ### 4 369 $ tout compris
 3 personnes, taxes et 2 valises en soute incluses
@@ -20,10 +20,10 @@
 
 | Prix | Compagnie | Dates | Escales | Villes |
 |---|---|---|---|---|
-| 4 389 $ | Air Canada + TAP Air Portugal (aller) · TAP Air Portugal (retour) | 25/3 → 2/4 | 1 escale | Lisbonne |
-| 4 466 $ | Air Canada + TAP Air Portugal (aller) · TAP Air Portugal (retour) | 25/3 → 2/4 | 1 escale | Lisbonne |
-| 6 561 $ | Royal Air Maroc (aller) · Air Canada (retour) | 25/3 → 2/4 | 1 escale | Lisbonne |
+| 4 388 $ | Air Canada + TAP Air Portugal (aller) · TAP Air Portugal (retour) | 25/3 → 2/4 | 1 escale | Lisbonne |
+| 4 467 $ | Air Canada + TAP Air Portugal (aller) · TAP Air Portugal (retour) | 25/3 → 2/4 | 1 escale | Lisbonne |
+| 6 559 $ | Royal Air Maroc (aller) · Air Canada (retour) | 25/3 → 2/4 | 1 escale | Lisbonne |
 | 6 673 $ | Royal Air Maroc (aller) · United Airlines (retour) | 25/3 → 2/4 | 2 escales | Lisbonne |
-| 7 041 $ * | Royal Air Maroc (aller) · TAP Air Portugal + Air Canada (retour) | 25/3 → 2/4 | 2 escales | Lisbonne / Porto |
+| 7 040 $ * | Royal Air Maroc (aller) · TAP Air Portugal + Air Canada (retour) | 25/3 → 2/4 | 2 escales | Lisbonne / Porto |
 
 _Prix = Google Flights taxes incluses + valises selon le tarif indiqué. Vérifier sur le site de la compagnie avant d'acheter._
