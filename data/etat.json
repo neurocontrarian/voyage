@@ -1,6 +1,6 @@
 {
   "echecs": 0,
-  "derniere_execution": "2026-10-25T23:17-04:00",
+  "derniere_execution": "2026-10-26T00:17-04:00",
   "scenarios": {
     "1": {
       "nom": "départ le 25 mars, retour le 2 avril, vol direct",
@@ -18,7 +18,7 @@
         "resume": "3 741 $ · Air Canada · 27/3 → 3/4 · direct · Lisbonne"
       },
       "jour": {
-        "date": "2026-10-25 00:17",
+        "date": "2026-10-26 00:17",
         "total": 3774,
         "score": 3774,
         "cle": "aller-retour | 2027-03-27 AC812 | 2027-04-03 AC813",
@@ -38,7 +38,7 @@
         "resume": "6 559 $ · Royal Air Maroc (aller) · Air Canada (retour) · 25/3 → 2/4 · escale à l'aller · Lisbonne"
       },
       "jour": {
-        "date": "2026-10-25 00:17",
+        "date": "2026-10-26 00:17",
         "total": 6545,
         "score": 6545,
         "cle": "2 allers simples | 2027-03-25 AT209+AT980 | 2027-04-02 AC813",
@@ -58,7 +58,7 @@
         "resume": "3 741 $ · Air Canada · 27/3 → 3/4 · direct · Lisbonne"
       },
       "jour": {
-        "date": "2026-10-25 00:17",
+        "date": "2026-10-26 00:17",
         "total": 3774,
         "score": 3774,
         "cle": "aller-retour | 2027-03-27 AC812 | 2027-04-03 AC813",
