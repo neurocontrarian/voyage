@@ -1,4 +1,4 @@
-# Portugal printemps 2027 — recherche du 2026-10-27 à 14:17
+# Portugal printemps 2027 — recherche du 2026-10-27 à 15:17
 
 ## Scénario 1 : départ le 25 mars, retour le 2 avril, vol direct
 
