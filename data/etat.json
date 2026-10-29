@@ -1,6 +1,6 @@
 {
   "echecs": 0,
-  "derniere_execution": "2026-10-28T23:17-04:00",
+  "derniere_execution": "2026-10-29T00:17-04:00",
   "scenarios": {
     "1": {
       "nom": "départ le 25 mars, retour le 2 avril, vol direct",
@@ -18,7 +18,7 @@
         "resume": "3 552 $ · Air Canada · 27/3 → 3/4 · direct · Lisbonne"
       },
       "jour": {
-        "date": "2026-10-28 05:17",
+        "date": "2026-10-29 00:17",
         "total": 3974,
         "score": 3974,
         "cle": "aller-retour | 2027-03-27 AC812 | 2027-04-03 AC813",
@@ -38,12 +38,12 @@
         "resume": "6 403 $ · Royal Air Maroc (aller) · Air Canada (retour) · 25/3 → 2/4 · escale à l'aller · Lisbonne"
       },
       "jour": {
-        "date": "2026-10-28 00:17",
-        "total": 6595,
-        "score": 6595,
+        "date": "2026-10-29 00:17",
+        "total": 6582,
+        "score": 6582,
         "cle": "2 allers simples | 2027-03-25 AT209+AT980 | 2027-04-02 AC813",
-        "fiche": "### 6 595 $ tout compris\n3 personnes, taxes et 2 valises en soute incluses\n\n| | |\n|---|---|\n| **Compagnie** | Royal Air Maroc (aller) · Air Canada (retour) |\n| **Tarif à choisir** | tarif le moins cher (aller) · Économie Basic (retour) |\n| **Détail du prix** | vols 6 167 $ (taxes incluses) + valises et tarif 428 $ |\n| **Aller** | jeu. 25 mars, Montréal 21 h 40 → Lisbonne ven. 26 mars 11 h 30 · escale à Casablanca (1 h 45) · 9 h 50 |\n| **Retour** | ven. 2 avril, Lisbonne 11 h 25 → Montréal 13 h 50 · direct · 7 h 25 |\n| **Arrivée au Portugal** | Lisbonne |\n| **Départ du Portugal** | Lisbonne |\n| **Réservation** | 2 billets séparés (un aller simple, un retour simple) |\n\n[Voir l'aller sur Google Flights](https://www.google.com/travel/flights/booking?tfs=CBwQAhpgEgoyMDI3LTAzLTI1Ih8KA1lVTBIKMjAyNy0wMy0yNRoDQ01OKgJBVDIDMjA5Ih8KA0NNThIKMjAyNy0wMy0yNhoDTElTKgJBVDIDOTgwagcIARIDWVVMcgcIARIDTElTQAFAAUABSAFwAYIBCwj___________8BmAEC&hl=fr&gl=CA&curr=CAD) · [Voir le retour sur Google Flights](https://www.google.com/travel/flights/booking?tfs=CBwQAho_EgoyMDI3LTA0LTAyIh8KA0xJUxIKMjAyNy0wNC0wMhoDWVVMKgJBQzIDODEzagcIARIDTElTcgcIARIDWVVMQAFAAUABSAFwAYIBCwj___________8BmAEC&hl=fr&gl=CA&curr=CAD)",
-        "resume": "6 595 $ · Royal Air Maroc (aller) · Air Canada (retour) · 25/3 → 2/4 · escale à l'aller · Lisbonne"
+        "fiche": "### 6 582 $ tout compris\n3 personnes, taxes et 2 valises en soute incluses\n\n| | |\n|---|---|\n| **Compagnie** | Royal Air Maroc (aller) · Air Canada (retour) |\n| **Tarif à choisir** | tarif le moins cher (aller) · Économie Basic (retour) |\n| **Détail du prix** | vols 6 154 $ (taxes incluses) + valises et tarif 428 $ |\n| **Aller** | jeu. 25 mars, Montréal 21 h 40 → Lisbonne ven. 26 mars 11 h 30 · escale à Casablanca (1 h 45) · 9 h 50 |\n| **Retour** | ven. 2 avril, Lisbonne 11 h 25 → Montréal 13 h 50 · direct · 7 h 25 |\n| **Arrivée au Portugal** | Lisbonne |\n| **Départ du Portugal** | Lisbonne |\n| **Réservation** | 2 billets séparés (un aller simple, un retour simple) |\n\n[Voir l'aller sur Google Flights](https://www.google.com/travel/flights/booking?tfs=CBwQAhpgEgoyMDI3LTAzLTI1Ih8KA1lVTBIKMjAyNy0wMy0yNRoDQ01OKgJBVDIDMjA5Ih8KA0NNThIKMjAyNy0wMy0yNhoDTElTKgJBVDIDOTgwagcIARIDWVVMcgcIARIDTElTQAFAAUABSAFwAYIBCwj___________8BmAEC&hl=fr&gl=CA&curr=CAD) · [Voir le retour sur Google Flights](https://www.google.com/travel/flights/booking?tfs=CBwQAho_EgoyMDI3LTA0LTAyIh8KA0xJUxIKMjAyNy0wNC0wMhoDWVVMKgJBQzIDODEzagcIARIDTElTcgcIARIDWVVMQAFAAUABSAFwAYIBCwj___________8BmAEC&hl=fr&gl=CA&curr=CAD)",
+        "resume": "6 582 $ · Royal Air Maroc (aller) · Air Canada (retour) · 25/3 → 2/4 · escale à l'aller · Lisbonne"
       }
     },
     "4": {
@@ -58,7 +58,7 @@
         "resume": "3 552 $ · Air Canada · 27/3 → 3/4 · direct · Lisbonne"
       },
       "jour": {
-        "date": "2026-10-28 05:17",
+        "date": "2026-10-29 00:17",
         "total": 3974,
         "score": 3974,
         "cle": "aller-retour | 2027-03-27 AC812 | 2027-04-03 AC813",
