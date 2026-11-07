@@ -1,4 +1,4 @@
-# Portugal printemps 2027 — recherche du 2026-11-07 à 04:17
+# Portugal printemps 2027 — recherche du 2026-11-07 à 05:17
 
 ## Scénario 1 : départ le 25 mars, retour le 2 avril, vol direct
 
@@ -26,9 +26,9 @@ Aucun vol trouvé sur Google Flights pour ce scénario.
 | Prix | Compagnie | Dates | Escales | Villes |
 |---|---|---|---|---|
 | 5 295 $ | Air Canada | 26/3 → 2/4 | direct | Lisbonne |
-| 5 340 $ | Air Canada | 26/3 → 3/4 | direct | Lisbonne |
+| 5 343 $ | Air Canada | 26/3 → 3/4 | direct | Lisbonne |
 | 7 294 $ | Air Canada | 27/3 → 3/4 | direct | Lisbonne |
-| 7 600 $ | Air Canada | 26/3 → 2/4 | direct | Lisbonne |
+| 7 603 $ | Air Canada | 26/3 → 2/4 | direct | Lisbonne |
 
 ## Scénario 3 : départ le 25 mars, retour le 2 avril, 1 escale permise
 
@@ -57,7 +57,7 @@ Meilleur voyage : 3 579 $, le même qu'au scénario 2.
 | Prix | Compagnie | Dates | Escales | Villes |
 |---|---|---|---|---|
 | 5 295 $ | Air Canada | 26/3 → 2/4 | direct | Lisbonne |
-| 5 340 $ | Air Canada | 26/3 → 3/4 | direct | Lisbonne |
+| 5 343 $ | Air Canada | 26/3 → 3/4 | direct | Lisbonne |
 | 5 372 $ | SATA International (aller) · Air Canada (retour) | 27/3 → 3/4 | escale à l'aller | Lisbonne |
 | 5 855 $ | SATA International (aller) · Air Transat (retour) | 27/3 → 3/4 | escale à l'aller | Lisbonne |
 
