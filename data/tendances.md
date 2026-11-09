@@ -1,10 +1,10 @@
 ## Tendances de prix
 
-Moment le moins cher pour acheter — heure : vers 8 h (-1,5 % par rapport à la moyenne) ; jour : vendredi (-10,3 % par rapport à la moyenne).
+Moment le moins cher pour acheter — heure : vers 8 h (-1,4 % par rapport à la moyenne) ; jour : vendredi (-10,3 % par rapport à la moyenne).
 
-_574 relevés. Écart = prix par rapport à la moyenne de la journée (heures) ou de la semaine (jours) ; négatif = moins cher. Indicatif : plus il y a de données, plus c'est fiable._
+_598 relevés. Écart = prix par rapport à la moyenne de la journée (heures) ou de la semaine (jours) ; négatif = moins cher. Indicatif : plus il y a de données, plus c'est fiable._
 
-### Par heure (25 journées retenues)
+### Par heure (26 journées retenues)
 
 | Heure | Écart |
 |---|---|
@@ -16,7 +16,7 @@ _574 relevés. Écart = prix par rapport à la moyenne de la journée (heures) o
 | 5 h | +0,1 % |
 | 6 h | +0,1 % |
 | 7 h | +0,1 % |
-| 8 h | -1,5 % |
+| 8 h | -1,4 % |
 | 9 h | +0,3 % |
 | 10 h | +0,2 % |
 | 11 h | -0,1 % |
