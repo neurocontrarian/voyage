@@ -1,15 +1,15 @@
 ## Tendances de prix
 
-Moment le moins cher pour acheter — heure : vers 8 h (-1,6 % par rapport à la moyenne) ; jour : vendredi (-4,1 % par rapport à la moyenne).
+Moment le moins cher pour acheter — heure : vers 8 h (-1,6 % par rapport à la moyenne) ; jour : vendredi (-4,8 % par rapport à la moyenne).
 
-_694 relevés. Écart = prix par rapport à la moyenne de la journée (heures) ou de la semaine (jours) ; négatif = moins cher. Indicatif : plus il y a de données, plus c'est fiable._
+_718 relevés. Écart = prix par rapport à la moyenne de la journée (heures) ou de la semaine (jours) ; négatif = moins cher. Indicatif : plus il y a de données, plus c'est fiable._
 
-### Par heure (30 journées retenues)
+### Par heure (31 journées retenues)
 
 | Heure | Écart |
 |---|---|
 | 0 h | -0,3 % |
-| 1 h | -0,4 % |
+| 1 h | -0,3 % |
 | 2 h | -0,3 % |
 | 3 h | -0,3 % |
 | 4 h | -0,3 % |
@@ -31,16 +31,16 @@ _694 relevés. Écart = prix par rapport à la moyenne de la journée (heures) o
 | 20 h | -0,4 % |
 | 21 h | -0,4 % |
 | 22 h | +1,2 % |
-| 23 h | +1,2 % |
+| 23 h | +1,1 % |
 
 ### Par jour de la semaine (4 semaines retenues)
 
 | Jour | Écart |
 |---|---|
-| lundi | -0,2 % |
-| mardi | -0,1 % |
-| mercredi | +4,2 % |
-| jeudi | +4,3 % |
-| vendredi | -4,1 % |
-| samedi | -2,9 % |
+| lundi | -0,7 % |
+| mardi | -0,7 % |
+| mercredi | +3,6 % |
+| jeudi | +3,7 % |
+| vendredi | -4,8 % |
+| samedi | +0,8 % |
 | dimanche | -2,6 % |
