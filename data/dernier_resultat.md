@@ -1,4 +1,4 @@
-# Portugal printemps 2027 — recherche du 2026-11-17 à 23:17
+# Portugal printemps 2027 — recherche du 2026-11-18 à 00:17
 
 ## Scénario 1 : départ le 25 mars, retour le 2 avril, vol direct
 
@@ -21,16 +21,25 @@ Aucun vol trouvé sur Google Flights pour ce scénario.
 
 [Voir sur Google Flights](https://www.google.com/travel/flights/booking?tfs=CBwQAho_EgoyMDI3LTAzLTI3Ih8KA1lVTBIKMjAyNy0wMy0yNxoDTElTKgJBQzIDODEyagcIARIDWVVMcgcIARIDTElTGj8SCjIwMjctMDQtMDMiHwoDTElTEgoyMDI3LTA0LTAzGgNZVUwqAkFDMgM4MTNqBwgBEgNMSVNyBwgBEgNZVUxAAUABQAFIAXABggELCP___________wGYAQE&hl=fr&gl=CA&curr=CAD)
 
+#### Autres options
+
+| Prix | Compagnie | Dates | Escales | Villes |
+|---|---|---|---|---|
+| 5 488 $ | Air Canada | 26/3 → 2/4 | direct | Lisbonne |
+| 5 638 $ | Air Canada | 26/3 → 3/4 | direct | Lisbonne |
+| 6 208 $ | Air Transat | 26/3 → 3/4 | direct | Lisbonne |
+| 7 299 $ | Air Canada | 27/3 → 3/4 | direct | Lisbonne |
+
 ## Scénario 3 : départ le 25 mars, retour le 2 avril, 1 escale permise
 
-### 6 608 $ tout compris
+### 6 609 $ tout compris
 3 personnes, taxes et 2 valises en soute incluses
 
 | | |
 |---|---|
 | **Compagnie** | Royal Air Maroc (aller) · Air Canada (retour) |
 | **Tarif à choisir** | tarif le moins cher (aller) · Économie Basic (retour) |
-| **Détail du prix** | vols 6 180 $ (taxes incluses) + valises et tarif 428 $ |
+| **Détail du prix** | vols 6 181 $ (taxes incluses) + valises et tarif 428 $ |
 | **Aller** | jeu. 25 mars, Montréal 21 h 40 → Lisbonne ven. 26 mars 11 h 30 · escale à Casablanca (1 h 45) · 9 h 50 |
 | **Retour** | ven. 2 avril, Lisbonne 11 h 25 → Montréal 13 h 50 · direct · 7 h 25 |
 | **Arrivée au Portugal** | Lisbonne |
@@ -47,8 +56,9 @@ Meilleur voyage : 4 435 $, le même qu'au scénario 2.
 
 | Prix | Compagnie | Dates | Escales | Villes |
 |---|---|---|---|---|
-| 5 903 $ | Royal Air Maroc (aller) · Air Transat (retour) | 25/3 → 1/4 | escale à l'aller | Lisbonne |
-| 6 608 $ | Royal Air Maroc (aller) · Air Canada (retour) | 25/3 → 1/4 | escale à l'aller | Lisbonne |
-| 6 608 $ | Royal Air Maroc (aller) · Air Canada (retour) | 25/3 → 2/4 | escale à l'aller | Lisbonne |
+| 5 377 $ | SATA International (aller) · Air Canada (retour) | 27/3 → 3/4 | escale à l'aller | Lisbonne |
+| 5 488 $ | Air Canada | 26/3 → 2/4 | direct | Lisbonne |
+| 5 638 $ | Air Canada | 26/3 → 3/4 | direct | Lisbonne |
+| 5 851 $ | SATA International (aller) · Air Transat (retour) | 27/3 → 3/4 | escale à l'aller | Lisbonne |
 
 _Prix = Google Flights taxes incluses + valises selon le tarif indiqué. Vérifier sur le site de la compagnie avant d'acheter._
