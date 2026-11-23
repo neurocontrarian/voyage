@@ -1,6 +1,6 @@
 {
   "echecs": 0,
-  "derniere_execution": "2026-11-23T01:17-05:00",
+  "derniere_execution": "2026-11-23T02:17-05:00",
   "scenarios": {
     "1": {
       "nom": "départ le 25 mars, retour le 2 avril, vol direct",
@@ -18,12 +18,12 @@
         "resume": "3 552 $ · Air Canada · 27/3 → 3/4 · direct · Lisbonne"
       },
       "jour": {
-        "date": "2026-11-23 00:17",
-        "total": 5407,
-        "score": 5407,
-        "cle": "aller-retour | 2027-03-26 AC812 | 2027-04-02 AC813",
-        "fiche": "### 5 407 $ tout compris\n3 personnes, taxes et 2 valises en soute incluses\n\n| | |\n|---|---|\n| **Compagnie** | Air Canada |\n| **Tarif à choisir** | Économie Basic |\n| **Détail du prix** | vols 4 991 $ (taxes incluses) + valises et tarif 416 $ |\n| **Aller** | ven. 26 mars, Montréal 22 h 40 → Lisbonne sam. 27 mars 9 h 20 · direct · 6 h 40 |\n| **Retour** | ven. 2 avril, Lisbonne 11 h 25 → Montréal 13 h 50 · direct · 7 h 25 |\n| **Arrivée au Portugal** | Lisbonne |\n| **Départ du Portugal** | Lisbonne |\n\n[Voir sur Google Flights](https://www.google.com/travel/flights/booking?tfs=CBwQAho_EgoyMDI3LTAzLTI2Ih8KA1lVTBIKMjAyNy0wMy0yNhoDTElTKgJBQzIDODEyagcIARIDWVVMcgcIARIDTElTGj8SCjIwMjctMDQtMDIiHwoDTElTEgoyMDI3LTA0LTAyGgNZVUwqAkFDMgM4MTNqBwgBEgNMSVNyBwgBEgNZVUxAAUABQAFIAXABggELCP___________wGYAQE&hl=fr&gl=CA&curr=CAD)",
-        "resume": "5 407 $ · Air Canada · 26/3 → 2/4 · direct · Lisbonne"
+        "date": "2026-11-23 02:17",
+        "total": 4435,
+        "score": 4435,
+        "cle": "aller-retour | 2027-03-27 AC812 | 2027-04-03 AC813",
+        "fiche": "### 4 435 $ tout compris\n3 personnes, taxes et 2 valises en soute incluses\n\n| | |\n|---|---|\n| **Compagnie** | Air Canada |\n| **Tarif à choisir** | Économie Basic |\n| **Détail du prix** | vols 4 019 $ (taxes incluses) + valises et tarif 416 $ |\n| **Aller** | sam. 27 mars, Montréal 21 h 45 → Lisbonne dim. 28 mars 9 h 20 · direct · 6 h 35 |\n| **Retour** | sam. 3 avril, Lisbonne 11 h 25 → Montréal 13 h 50 · direct · 7 h 25 |\n| **Arrivée au Portugal** | Lisbonne |\n| **Départ du Portugal** | Lisbonne |\n\n[Voir sur Google Flights](https://www.google.com/travel/flights/booking?tfs=CBwQAho_EgoyMDI3LTAzLTI3Ih8KA1lVTBIKMjAyNy0wMy0yNxoDTElTKgJBQzIDODEyagcIARIDWVVMcgcIARIDTElTGj8SCjIwMjctMDQtMDMiHwoDTElTEgoyMDI3LTA0LTAzGgNZVUwqAkFDMgM4MTNqBwgBEgNMSVNyBwgBEgNZVUxAAUABQAFIAXABggELCP___________wGYAQE&hl=fr&gl=CA&curr=CAD)",
+        "resume": "4 435 $ · Air Canada · 27/3 → 3/4 · direct · Lisbonne"
       }
     },
     "3": {
@@ -58,12 +58,12 @@
         "resume": "3 552 $ · Air Canada · 27/3 → 3/4 · direct · Lisbonne"
       },
       "jour": {
-        "date": "2026-11-23 00:17",
-        "total": 5377,
-        "score": 5377,
-        "cle": "2 allers simples | 2027-03-27 S4328+S4122 | 2027-04-03 AC813",
-        "fiche": "### 5 377 $ tout compris\n3 personnes, taxes et 2 valises en soute incluses\n\n| | |\n|---|---|\n| **Compagnie** | SATA International (aller) · Air Canada (retour) |\n| **Tarif à choisir** | tarif le moins cher (aller) · Économie Basic (retour) |\n| **Détail du prix** | vols 4 949 $ (taxes incluses) + valises et tarif 428 $ |\n| **Aller** | sam. 27 mars, Montréal 22 h 05 → Lisbonne dim. 28 mars 13 h 05 · escale à Ponta Delgada (2 h 25) · 10 h 00 |\n| **Retour** | sam. 3 avril, Lisbonne 11 h 25 → Montréal 13 h 50 · direct · 7 h 25 |\n| **Arrivée au Portugal** | Lisbonne |\n| **Départ du Portugal** | Lisbonne |\n| **Réservation** | 2 billets séparés (un aller simple, un retour simple) |\n\n[Voir l'aller sur Google Flights](https://www.google.com/travel/flights/booking?tfs=CBwQAhpgEgoyMDI3LTAzLTI3Ih8KA1lVTBIKMjAyNy0wMy0yNxoDUERMKgJTNDIDMzI4Ih8KA1BETBIKMjAyNy0wMy0yOBoDTElTKgJTNDIDMTIyagcIARIDWVVMcgcIARIDTElTQAFAAUABSAFwAYIBCwj___________8BmAEC&hl=fr&gl=CA&curr=CAD) · [Voir le retour sur Google Flights](https://www.google.com/travel/flights/booking?tfs=CBwQAho_EgoyMDI3LTA0LTAzIh8KA0xJUxIKMjAyNy0wNC0wMxoDWVVMKgJBQzIDODEzagcIARIDTElTcgcIARIDWVVMQAFAAUABSAFwAYIBCwj___________8BmAEC&hl=fr&gl=CA&curr=CAD)",
-        "resume": "5 377 $ · SATA International (aller) · Air Canada (retour) · 27/3 → 3/4 · escale à l'aller · Lisbonne"
+        "date": "2026-11-23 02:17",
+        "total": 4435,
+        "score": 4435,
+        "cle": "aller-retour | 2027-03-27 AC812 | 2027-04-03 AC813",
+        "fiche": "### 4 435 $ tout compris\n3 personnes, taxes et 2 valises en soute incluses\n\n| | |\n|---|---|\n| **Compagnie** | Air Canada |\n| **Tarif à choisir** | Économie Basic |\n| **Détail du prix** | vols 4 019 $ (taxes incluses) + valises et tarif 416 $ |\n| **Aller** | sam. 27 mars, Montréal 21 h 45 → Lisbonne dim. 28 mars 9 h 20 · direct · 6 h 35 |\n| **Retour** | sam. 3 avril, Lisbonne 11 h 25 → Montréal 13 h 50 · direct · 7 h 25 |\n| **Arrivée au Portugal** | Lisbonne |\n| **Départ du Portugal** | Lisbonne |\n\n[Voir sur Google Flights](https://www.google.com/travel/flights/booking?tfs=CBwQAho_EgoyMDI3LTAzLTI3Ih8KA1lVTBIKMjAyNy0wMy0yNxoDTElTKgJBQzIDODEyagcIARIDWVVMcgcIARIDTElTGj8SCjIwMjctMDQtMDMiHwoDTElTEgoyMDI3LTA0LTAzGgNZVUwqAkFDMgM4MTNqBwgBEgNMSVNyBwgBEgNZVUxAAUABQAFIAXABggELCP___________wGYAQE&hl=fr&gl=CA&curr=CAD)",
+        "resume": "4 435 $ · Air Canada · 27/3 → 3/4 · direct · Lisbonne"
       }
     }
   }
